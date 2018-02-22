@@ -1,0 +1,21 @@
+---
+# Create a sandbox environment
+
+- name: create vagrant sandbox environment
+  hosts: localhost
+  vars_prompt:
+    - name: "vagrant_sandbox_inventory"
+      prompt: >-
+        Enter absolute path to vagrant sandbox inventory file
+        (if not given a random one will be created)
+      private: no
+  roles:
+    - role: vagrant_presets
+    - role: vagrant_sandbox
+      vagrant_sandbox_state: started
+      vagrant_sandbox_idempotence_test: false
+      vagrant_sandbox_cleanup_by_ppid: false
+      vagrant_sandbox_cleanup_by_user: false
+      vagrant_sandbox_cleanup_by_playbook: false
+  tasks:
+    - debug: var=vagrant_sandbox_inventory

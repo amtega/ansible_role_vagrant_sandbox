@@ -1,2 +1,68 @@
 ---
 # Role default lower priority variables
+
+# List of vagrant boxes to use to setup de sandbox. If not specified and
+# vagrant_presets role is loaded, all boxes presets will be used.
+# See vagrant_provisioner documentation to know the structure of this list.
+
+vagrant_sandbox_boxes: []
+
+# List of vagrant vms to use to setup de sandbox. If not specified and
+# vagrant_presets role is loaded, all vm presets will be used.
+# See vagrant_provisioner documentation to know the structure of this list.
+
+vagrant_sandbox_vms: []
+
+# Group to put in the sandbox provisioned vms
+
+vagrant_sandbox_group: vagrant_sandbox_vms
+
+# State of the vagrant sandbox. Can be started, recreated or absent.
+# The difference between started and recreated is that the last will not
+# provisione the boxes, something useful if you only want to refresh the
+# vms.
+
+vagrant_sandbox_state: started
+
+# Indicate the path to the inventory file to contain the vagrant vms
+# provisioned by the role. If empty one will be created with random name
+
+vagrant_sandbox_inventory:
+
+# Indicate if the idempotence test must be run using idempotence_tester role.
+
+vagrant_sandbox_idempotence_test: true
+
+# Indicate if the provisioned vms must be recreated after running the
+# idempotence test.
+
+vagrant_sandbox_idempotence_test_recreate_after: true
+
+# Before setup the sandbox remove previous vms created with the same
+# parent process id than actual. Be warned that this option may cause problems
+# if you launch several sandboxes in parallel. By default no cleanup will be
+# done if an inventory file is specified in 'vagrant_sandbox_inventory'
+
+vagrant_sandbox_cleanup_by_ppid: "{{ vagrant_sandbox_inventory is none }}"
+
+# Before setup the sandbox remove previous vms created with the same
+# user than the actual. Be warned that this option may cause problems
+# if you launch several sandboxes in parallel. By default no cleanup will be
+# done if an inventory file is specified in 'vagrant_sandbox_inventory'
+
+vagrant_sandbox_cleanup_by_user: "{{ vagrant_sandbox_inventory is none }}"
+
+# Before setup the sandbox remove previous vms created with the same
+# playbook than the actual. Be warned that this option may cause problems
+# if you launch several sandboxes in parallel. By default no cleanup will be
+# done if an inventory file is specified in 'vagrant_sandbox_inventory'
+
+vagrant_sandbox_cleanup_by_playbook: "{{ vagrant_sandbox_inventory is none }}"
+
+# Before setup the sandbox remove previous vms created with the same
+# inventory than the actual. Be warned that this option may cause problems
+# if you launch several sandboxes in parallel. By default cleanup will be
+# done if an inventory file is specified in 'vagrant_sandbox_inventory'
+
+vagrant_sandbox_cleanup_by_inventory: >-
+  {{ vagrant_sandbox_inventory is not none }}

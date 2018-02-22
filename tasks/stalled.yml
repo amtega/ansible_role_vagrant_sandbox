@@ -1,0 +1,81 @@
+---
+# Stalled vms managament tasks
+
+- block:
+  - name: get playbook file
+    vagrant_sandbox_playbook:
+    register: vagrant_sandbox_get_playbook_result
+
+  - name: setup fact with full playbook path
+    set_fact:
+      vagrant_sandbox_playbook: >-
+        {{ playbook_dir }}/{{ vagrant_sandbox_get_playbook_result.playbook }}
+
+  - name: search previous vagrants vms created by same parent ppid
+    shell: >-
+      vagrant ps -a --format='{''{.Names}''}'
+      --filter label=vagrant_sandbox_ppid={{ lookup(
+        'pipe',
+        'ps -o ppid= -p `ps -o ppid= -p $PPID`')
+                                            | trim }}
+    changed_when: false
+    when: vagrant_sandbox_cleanup_by_ppid
+    register: vagrant_sandbox_vms_by_ppid_result
+    check_mode: no
+
+  - name: search previous vagrants vms created by same user
+    shell: >-
+      vagrant ps -a --format='{''{.Names}''}'
+      --filter label=vagrant_sandbox_user={{ lookup('pipe', 'echo $USER')
+                                            | trim }}
+    changed_when: false
+    when: vagrant_sandbox_cleanup_by_user
+    register: vagrant_sandbox_vms_by_user_result
+    check_mode: no
+
+  - name: search previous vagrants vms created by same playbook
+    shell: >-
+      vagrant ps -a --format='{''{.Names}''}'
+      --filter label=vagrant_sandbox_playbook={{ vagrant_sandbox_playbook }}
+    changed_when: false
+    when: vagrant_sandbox_cleanup_by_playbook
+    register: vagrant_sandbox_vms_by_playbook_result
+    check_mode: no
+
+  - name: search previous vagrants vms created with same inventory
+    shell: >-
+      vagrant ps -a --format='{''{.Names}''}'
+      --filter label=vagrant_sandbox_inventory={{ vagrant_sandbox_inventory }}
+    changed_when: false
+    when: vagrant_sandbox_cleanup_by_inventory
+    register: vagrant_sandbox_vms_by_inventory_result
+    check_mode: no
+
+  - name: cleanup previous vagrant vms
+    vagrant_container:
+      name: "{{ item }}"
+      state: absent
+      force_kill: true
+    when: >-
+      vagrant_sandbox_cleanup_by_ppid
+      or vagrant_sandbox_cleanup_by_user
+      or vagrant_sandbox_cleanup_by_playbook
+      or vagrant_sandbox_cleanup_by_inventory
+    with_items: >-
+      {{ vagrant_sandbox_vms_by_ppid_result.stdout_lines | default([])
+         | union(
+             vagrant_sandbox_vms_by_user_result.stdout_lines
+             | default([]))
+         | union(
+             vagrant_sandbox_vms_by_playbook_result.stdout_lines
+             | default([]))
+         | union(
+             vagrant_sandbox_vms_by_inventory_result.stdout_lines
+             | default([]))
+         | difference(
+             vagrant_sandbox_vms | map(attribute='name') | list)
+         | unique }}
+
+  tags:
+    - role::vagrant_sandbox
+    - role::vagrant_sandbox::stalled

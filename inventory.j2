@@ -1,0 +1,12 @@
+{{ ansible_managed | comment }}
+{% for container in docker_provisioner_containers %}
+{% if container.state | default(docker_provisioner_container_state) == "started" %}
+{% set vars = hostvars[container.name] %}
+{% for group in container.groups | default(docker_provisioner_container_groups) %}
+
+[{{ group }}]
+{{ container.name }} ansible_host={{ vars['ansible_host'] }} ansible_user={{ vars['ansible_user'] }} ansible_password={{ vars['ansible_password'] }} ansible_connection={{ vars['ansible_connection'] }}
+
+{% endfor %}
+{% endif %}
+{% endfor %}

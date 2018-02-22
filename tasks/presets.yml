@@ -1,0 +1,16 @@
+---
+# Role tasks
+
+- name: defaulting vagrant sandbox from vagrant_presets role
+  set_fact:
+    vagrant_sandbox_boxes: >-
+      {{ vagrant_presets_boxes }}
+    vagrant_sandbox_vms: >-
+      {{ vagrant_presets_vms | vagrant_presets_randomize_names }}
+  when:
+    - vagrant_sandbox_boxes | length == 0 or vagrant_sandbox_vms == 0
+    - vagrant_presets_boxes | default([]) | length > 0
+    - vagrant_presets_vms | default([]) | length > 0
+  tags:
+    - role::vagrant_sandbox
+    - role::vagrant_sandbox::presets

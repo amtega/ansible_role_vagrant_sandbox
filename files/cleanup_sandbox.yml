@@ -1,0 +1,14 @@
+---
+# Drop a sandbox environment
+
+- name: cleanup vagrant sandbox environment
+  hosts: localhost
+  vars_prompt:
+    - name: "vagrant_sandbox_inventory"
+      prompt: >-
+        Enter absolute path to vagrant sandbox inventory file
+        (if not given will try to cleanup all vagrant sandboxes)
+      private: no
+  roles:
+    - role: vagrant_sandbox
+      vagrant_sandbox_state: absent
