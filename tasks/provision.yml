@@ -11,6 +11,7 @@
              | ternary([], vagrant_sandbox_boxes) }}
         vagrant_provisioner_box_state: present
         vagrant_provisioner_vms: "{{ vagrant_sandbox_vms }}"
+        vagrant_provisioner_vms_directory: "{{ vagrant_sandbox_vms_directory }}"
         vagrant_provisioner_vm_groups: ["{{ vagrant_sandbox_group }}"]
         vagrant_provisioner_inventory: >-
          {{ (vagrant_sandbox_state in ["started", "recreated"])
@@ -23,9 +24,8 @@
       template:
         src: sandbox.ini.j2
         dest: >-
-          {{ vagrant_provisioner_vms_directory | expanduser
-             + "/virtual_machines/"
-             + vm.subdirectory | default(vm.name) }}/sandbox.ini
+          {{ hostvars[vm.hostname]['vagrant_provisioner_vm_directory']
+             + "/sandbox.ini" }}
         force: yes
       register: vagrant_provisioner_create_vagrantfile_result
       with_items: "{{ vagrant_sandbox_vms }}"

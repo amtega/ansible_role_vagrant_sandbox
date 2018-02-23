@@ -11,70 +11,99 @@
       vagrant_sandbox_playbook: >-
         {{ playbook_dir }}/{{ vagrant_sandbox_get_playbook_result.playbook }}
 
-  - name: search previous vagrants vms created by same parent ppid
-    shell: >-
-      vagrant ps -a --format='{''{.Names}''}'
-      --filter label=vagrant_sandbox_ppid={{ lookup(
-        'pipe',
-        'ps -o ppid= -p `ps -o ppid= -p $PPID`')
-                                            | trim }}
-    changed_when: false
-    when: vagrant_sandbox_cleanup_by_ppid
-    register: vagrant_sandbox_vms_by_ppid_result
-    check_mode: no
+  - name: search sanbox state files
+    find:
+      paths: "{{ vagrant_sandbox_vms_directory }}"
+      patterns: "*.ini"
+    register: vagrant_sandbox_search_state_files_result
 
-  - name: search previous vagrants vms created by same user
-    shell: >-
-      vagrant ps -a --format='{''{.Names}''}'
-      --filter label=vagrant_sandbox_user={{ lookup('pipe', 'echo $USER')
-                                            | trim }}
-    changed_when: false
-    when: vagrant_sandbox_cleanup_by_user
-    register: vagrant_sandbox_vms_by_user_result
-    check_mode: no
+  - debug: var=vagrant_sandbox_search_state_files_result
 
-  - name: search previous vagrants vms created by same playbook
-    shell: >-
-      vagrant ps -a --format='{''{.Names}''}'
-      --filter label=vagrant_sandbox_playbook={{ vagrant_sandbox_playbook }}
-    changed_when: false
-    when: vagrant_sandbox_cleanup_by_playbook
-    register: vagrant_sandbox_vms_by_playbook_result
-    check_mode: no
 
-  - name: search previous vagrants vms created with same inventory
-    shell: >-
-      vagrant ps -a --format='{''{.Names}''}'
-      --filter label=vagrant_sandbox_inventory={{ vagrant_sandbox_inventory }}
-    changed_when: false
-    when: vagrant_sandbox_cleanup_by_inventory
-    register: vagrant_sandbox_vms_by_inventory_result
-    check_mode: no
+  # - name: cleanup previous vagrant vms
+  #   shell: "vagrant destroy --force --machine-readable"
+  #   args:
+  #     removes: "Vagrantfile"
+  #     chdir: "{{ item.path }}"
+  #   changed_when:
+  #     stdout | search("action,destroy,start")
+  #     and stdout | search("action,destroy,end")
+  #     and not stdout | search("Domain is not created")
+  #   register: vagrant_provisioner_destroy_result
+  #   with_items: vagrant_sandbox_search_state_files_result.files
+  #   vars:
+  #     stdout: vagrant_provisioner_destroy_result.stdout
+  #
+  # - name: "remove vagrant vm directory for vm {{ vm.hostname }}"
+  #   file:
+  #     path: "{{ vm_path }}"
+  #     state: absent
+  #     force: yes
 
-  - name: cleanup previous vagrant vms
-    vagrant_container:
-      name: "{{ item }}"
-      state: absent
-      force_kill: true
-    when: >-
-      vagrant_sandbox_cleanup_by_ppid
-      or vagrant_sandbox_cleanup_by_user
-      or vagrant_sandbox_cleanup_by_playbook
-      or vagrant_sandbox_cleanup_by_inventory
-    with_items: >-
-      {{ vagrant_sandbox_vms_by_ppid_result.stdout_lines | default([])
-         | union(
-             vagrant_sandbox_vms_by_user_result.stdout_lines
-             | default([]))
-         | union(
-             vagrant_sandbox_vms_by_playbook_result.stdout_lines
-             | default([]))
-         | union(
-             vagrant_sandbox_vms_by_inventory_result.stdout_lines
-             | default([]))
-         | difference(
-             vagrant_sandbox_vms | map(attribute='name') | list)
-         | unique }}
+  # - name: search previous vagrant vms created by same parent ppid
+  #   shell: >-
+  #     vagrant ps -a --format='{''{.Names}''}'
+  #     --filter label=vagrant_sandbox_ppid={{ lookup(
+  #       'pipe',
+  #       'ps -o ppid= -p `ps -o ppid= -p $PPID`')
+  #                                           | trim }}
+  #   changed_when: false
+  #   when: vagrant_sandbox_cleanup_by_ppid
+  #   register: vagrant_sandbox_vms_by_ppid_result
+  #   check_mode: no
+  #
+  # - name: search previous vagrants vms created by same user
+  #   shell: >-
+  #     vagrant ps -a --format='{''{.Names}''}'
+  #     --filter label=vagrant_sandbox_user={{ lookup('pipe', 'echo $USER')
+  #                                           | trim }}
+  #   changed_when: false
+  #   when: vagrant_sandbox_cleanup_by_user
+  #   register: vagrant_sandbox_vms_by_user_result
+  #   check_mode: no
+  #
+  # - name: search previous vagrants vms created by same playbook
+  #   shell: >-
+  #     vagrant ps -a --format='{''{.Names}''}'
+  #     --filter label=vagrant_sandbox_playbook={{ vagrant_sandbox_playbook }}
+  #   changed_when: false
+  #   when: vagrant_sandbox_cleanup_by_playbook
+  #   register: vagrant_sandbox_vms_by_playbook_result
+  #   check_mode: no
+  #
+  # - name: search previous vagrants vms created with same inventory
+  #   shell: >-
+  #     vagrant ps -a --format='{''{.Names}''}'
+  #     --filter label=vagrant_sandbox_inventory={{ vagrant_sandbox_inventory }}
+  #   changed_when: false
+  #   when: vagrant_sandbox_cleanup_by_inventory
+  #   register: vagrant_sandbox_vms_by_inventory_result
+  #   check_mode: no
+  #
+  # - name: cleanup previous vagrant vms
+  #   vagrant_container:
+  #     name: "{{ item }}"
+  #     state: absent
+  #     force_kill: true
+  #   when: >-
+  #     vagrant_sandbox_cleanup_by_ppid
+  #     or vagrant_sandbox_cleanup_by_user
+  #     or vagrant_sandbox_cleanup_by_playbook
+  #     or vagrant_sandbox_cleanup_by_inventory
+  #   with_items: >-
+  #     {{ vagrant_sandbox_vms_by_ppid_result.stdout_lines | default([])
+  #        | union(
+  #            vagrant_sandbox_vms_by_user_result.stdout_lines
+  #            | default([]))
+  #        | union(
+  #            vagrant_sandbox_vms_by_playbook_result.stdout_lines
+  #            | default([]))
+  #        | union(
+  #            vagrant_sandbox_vms_by_inventory_result.stdout_lines
+  #            | default([]))
+  #        | difference(
+  #            vagrant_sandbox_vms | map(attribute='name') | list)
+  #        | unique }}
 
   tags:
     - role::vagrant_sandbox

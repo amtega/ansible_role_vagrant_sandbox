@@ -13,6 +13,10 @@ vagrant_sandbox_boxes: []
 
 vagrant_sandbox_vms: []
 
+# Directory where sandbox vms will be placed
+
+vagrant_sandbox_vms_directory: "~/.vagrant_sandbox"
+
 # Group to put in the sandbox provisioned vms
 
 vagrant_sandbox_group: vagrant_sandbox_vms

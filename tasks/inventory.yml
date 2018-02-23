@@ -2,29 +2,28 @@
 # Sandbox inventory tasks
 
 - block:
-  - block:
-    - name: create temporary file to store vagrant sandbox vms inventory
-      tempfile:
-        state: file
-        suffix: .inventory
-      register: vagrant_sandbox_create_inventory_result
+    - block:
+        - name: create temporary file to store vagrant sandbox vms inventory
+          tempfile:
+            state: file
+            suffix: .inventory
+          register: vagrant_sandbox_create_inventory_result
 
-    - name: setup fact with path to vagrant sandbox vms inventory
-      set_fact:
-        vagrant_sandbox_inventory: >-
-          {{ vagrant_sandbox_create_inventory_result.path }}
+        - name: setup fact with path to vagrant sandbox vms inventory
+          set_fact:
+            vagrant_sandbox_inventory: >-
+              {{ vagrant_sandbox_create_inventory_result.path }}
+      when:
+        - vagrant_sandbox_state in ["started", "recreated"]
+        - >-
+          vagrant_sandbox_inventory is none
+          or vagrant_sandbox_inventory | length == 0
 
-    when:
-      - vagrant_sandbox_state in ["started", "recreated"]
-      - >-
-        vagrant_sandbox_inventory is none
-        or vagrant_sandbox_inventory | length == 0
-
-  - name: delete temporary file with vagrant sandbox vms inventory
-    file:
-      path: "{{ vagrant_sandbox_inventory }}"
-      state: absent
-    when: vagrant_sandbox_state == "absent"
+    - name: delete temporary file with vagrant sandbox vms inventory
+      file:
+        path: "{{ vagrant_sandbox_inventory }}"
+        state: absent
+      when: vagrant_sandbox_state == "absent"
 
   tags:
     - role::vagrant_sandbox

@@ -13,11 +13,11 @@
     - role::vagrant_sandbox
     - role::vagrant_sandbox::presets
 
-# - name: manage stalled containers
-#   import_tasks: stalled.yml
-#   tags:
-#     - role::vagrant_sandbox
-#     - role::vagrant_sandbox::stalled
+- name: manage stalled containers
+  import_tasks: stalled.yml
+  tags:
+    - role::vagrant_sandbox
+    - role::vagrant_sandbox::stalled
 
 - name: setup sandbox inventory
   import_tasks: inventory.yml
@@ -30,9 +30,9 @@
   tags:
     - role::vagrant_sandbox
     - role::vagrant_sandbox::provision
-#
-# - name: run idempotence test
-#   import_tasks: idempotence.yml
-#   tags:
-#     - role::vagrant_sandbox
-#     - role::vagrant_sandbox::idempotence
+
+- name: run idempotence test
+  import_tasks: idempotence.yml
+  tags:
+    - role::vagrant_sandbox
+    - role::vagrant_sandbox::idempotence

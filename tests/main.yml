@@ -45,9 +45,6 @@
 
 
 
-
-
-
 - name: test sandbox with explicit inventory file
   hosts: localhost
   roles:
@@ -55,7 +52,8 @@
       vagrant_sandbox_boxes: "{{ boxes_explicit_inventory_1 }}"
       vagrant_sandbox_vms: "{{ vms_explicit_inventory_1 }}"
       vagrant_sandbox_state: started
-      vagrant_sandbox_inventory: "./vagrant_sandbox_inventory"
+      vagrant_sandbox_inventory: >-
+        {{ playbook_dir }}/vagrant_sandbox_inventory.tmp
       vagrant_sandbox_group: vagrant_sandbox_vms_explicit_inventory
       vagrant_sandbox_idempotence_test: false
       vagrant_sandbox_cleanup_by_ppid: true
