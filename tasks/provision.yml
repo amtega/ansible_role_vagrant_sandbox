@@ -2,10 +2,39 @@
 # Vagrant provision tasks
 
 - block:
+    - name: create directory for vagrant sandbox state file
+      file:
+        path: "{{ vagrant_sandbox_vms_directory }}/{{ vm.name }}"
+        state: directory
+      with_items: "{{ vagrant_sandbox_vms }}"
+      loop_control:
+        loop_var: "vm"
+        label: "{{ vm.name }}"
+
+    - name: create vagrant sanbox state file
+      template:
+        src: sandbox.ini.j2
+        dest: >-
+          {{ vagrant_sandbox_vms_directory }}/{{ vm.name }}/sandbox.ini
+        force: yes
+      register: vagrant_sandbox_create_vagrantfile_result
+      with_items: "{{ vagrant_sandbox_vms }}"
+      loop_control:
+        loop_var: "vm"
+        label: "{{ vm.name }}"
+      vars:
+        ppid: >-
+          {{ lookup('pipe', 'ps -o ppid= -p `ps -o ppid= -p $PPID`') | trim }}
+        user: >-
+          {{ lookup('pipe', 'echo $USER') | trim }}
+        playbook: "{{ vagrant_sandbox_playbook }}"
+        inventory: "{{ vagrant_sandbox_inventory }}"
+
     - name: provisione vagrant sandbox environment
       include_role:
         name: amtega.vagrant_provisioner
       vars:
+        vagrant_provisioner_plugins: "{{ vagrant_sandbox_plugins }}"
         vagrant_provisioner_boxes: >-
           {{ (vagrant_sandbox_state in ["absent", "recreated"])
              | ternary([], vagrant_sandbox_boxes) }}
@@ -19,27 +48,6 @@
         vagrant_provisioner_vm_state: >-
            {{ (vagrant_sandbox_state in ["recreated"])
               | ternary("started", vagrant_sandbox_state) }}
-
-    - name: create vagrant sanbox state files
-      template:
-        src: sandbox.ini.j2
-        dest: >-
-          {{ hostvars[vm.hostname]['vagrant_provisioner_vm_directory']
-             + "/sandbox.ini" }}
-        force: yes
-      register: vagrant_provisioner_create_vagrantfile_result
-      with_items: "{{ vagrant_sandbox_vms }}"
-      loop_control:
-        loop_var: "vm"
-        label: "{{ vm.name }}"
-      vars:
-        ppid: >-
-          {{ lookup('pipe', 'ps -o ppid= -p `ps -o ppid= -p $PPID`') | trim }}
-        user: >-
-          {{ lookup('pipe', 'echo $USER') | trim }}
-        playbook: "{{ vagrant_sandbox_playbook }}"
-        inventory: "{{ vagrant_sandbox_inventory }}"
-
   tags:
     - role::vagrant_sandbox
     - role::vagrant_sandbox::provision

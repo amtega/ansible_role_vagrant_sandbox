@@ -1,6 +1,11 @@
 ---
 # Role default lower priority variables
 
+# List of vagrant plugins to use to setup de sandbox.
+# See vagrant_provisioner documentation to know the structure of this list.
+
+vagrant_sandbox_plugins: []
+
 # List of vagrant boxes to use to setup de sandbox. If not specified and
 # vagrant_presets role is loaded, all boxes presets will be used.
 # See vagrant_provisioner documentation to know the structure of this list.

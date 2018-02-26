@@ -1,48 +1,56 @@
-# ---
-# # Idempotence test tasks
-#
-# - block:
-#   - block:
-#     - name: run idempotence test
-#       include_role:
-#         name: amtega.idempotence_tester
-#       vars:
-#         idempotence_tester_inventory: "{{ docker_sandbox_inventory }}"
-#         idempotence_tester_group: "{{ docker_sandbox_group }}"
-#
-#     - name: setup fact to store idempotence test result
-#       set_fact:
-#         docker_sandbox_idempotence_result: >-
-#           {{ idempotence_tester_test_result }}
-#
-#     when:
-#       - docker_sandbox_state in ["started", "recreated"]
-#       - docker_sandbox_idempotence_test
-#       - docker_sandbox_inventory | length > 0
-#
-# #
-# # FIXME: Impplement recreation
-# #
-#
-#   - name: recreate sandbox vms after running idempotence test
-#     include_role:
-#       name: amtega.sandbox_provisioner
-#     vars:
-#       sandbox_provisioner_boxes: []
-#       sandbox_provisioner_vms: "{{ docker_sandbox_vms }}"
-#       sandbox_provisioner_vm_groups: ["{{ docker_sandbox_group }}"]
-#       sandbox_provisioner_inventory: "{{ docker_sandbox_inventory }}"
-#       sandbox_provisioner_vm_state: started
-#     when:
-#       - docker_sandbox_state in ["started", "recreated"]
-#       - docker_sandbox_idempotence_test
-#       - docker_sandbox_inventory | length > 0
-#       - docker_sandbox_idempotence_test_recreate_after
-#
-# #
-# # FIXME: Add sandbox.ini
-# #
-#
-#   tags:
-#     - role::vagrant_sandbox
-#     - role::vagrant_sandbox::idempotence
+---
+# Idempotence test tasks
+
+- block:
+  - block:
+    - name: run idempotence test
+      include_role:
+        name: amtega.idempotence_tester
+      vars:
+        idempotence_tester_inventory: "{{ vagrant_sandbox_inventory }}"
+        idempotence_tester_group: "{{ vagrant_sandbox_group }}"
+
+    - name: setup fact to store idempotence test result
+      set_fact:
+        vagrant_sandbox_idempotence_result: >-
+          {{ idempotence_tester_test_result }}
+
+    when:
+      - vagrant_sandbox_state in ["started", "recreated"]
+      - vagrant_sandbox_idempotence_test
+      - vagrant_sandbox_inventory | length > 0
+
+  - name: destroy sandbox vms after running idempotence test
+    include_role:
+      name: amtega.sandbox_provisioner
+    vars:
+      vagrant_provisioner_plugins: []
+      vagrant_provisioner_boxes: []
+      vagrant_provisioner_vms: "{{ vagrant_sandbox_vms }}"
+      vagrant_provisioner_vm_groups: ["{{ vagrant_sandbox_group }}"]
+      vagrant_provisioner_inventory: "{{ vagrant_sandbox_inventory }}"
+      vagrant_provisioner_vm_state: absent
+    when:
+      - vagrant_sandbox_state in ["started", "recreated"]
+      - vagrant_sandbox_idempotence_test
+      - vagrant_sandbox_inventory | length > 0
+      - vagrant_sandbox_idempotence_test_recreate_after
+
+  - name: recreate sandbox vms after running idempotence test
+    include_role:
+      name: amtega.sandbox_provisioner
+    vars:
+      vagrant_provisioner_plugins: []
+      vagrant_provisioner_boxes: []
+      vagrant_provisioner_vms: "{{ vagrant_sandbox_vms }}"
+      vagrant_provisioner_vm_groups: ["{{ vagrant_sandbox_group }}"]
+      vagrant_provisioner_inventory: "{{ vagrant_sandbox_inventory }}"
+      vagrant_provisioner_vm_state: started
+    when:
+      - vagrant_sandbox_state in ["started", "recreated"]
+      - vagrant_sandbox_idempotence_test
+      - vagrant_sandbox_inventory | length > 0
+      - vagrant_sandbox_idempotence_test_recreate_after
+  tags:
+    - role::vagrant_sandbox
+    - role::vagrant_sandbox::idempotence
