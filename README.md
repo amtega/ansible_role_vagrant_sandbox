@@ -93,14 +93,14 @@ ansible-playbook files/cleanup_sandbox.yml -e "vagrant_sandbox_inventory=/tmp/an
 Test are based on vagrant vms. You can run the tests with the following commands:
 
 ```shell
-$ cd amtega.vagrant_sandbox/test
+$ cd amtega.vagrant_sandbox/tests
 $ ansible-playbook main.yml
 ```
 
 If you have vagrant engine configured you can avoid running dependant 'vagrant_engine' role (that usually requries root privileges) with the following commands:
 
 ```shell
-$ cd amtega.vagrant_sandbox/test
+$ cd amtega.vagrant_sandbox/tests
 $ ansible-playbook --skip-tags "role::vagrant_engine" main.yml
 ```
 

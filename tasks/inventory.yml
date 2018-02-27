@@ -24,7 +24,6 @@
         path: "{{ vagrant_sandbox_inventory }}"
         state: absent
       when: vagrant_sandbox_state == "absent"
-
   tags:
     - role::vagrant_sandbox
     - role::vagrant_sandbox::inventory

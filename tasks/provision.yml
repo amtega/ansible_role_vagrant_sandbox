@@ -35,9 +35,7 @@
         name: amtega.vagrant_provisioner
       vars:
         vagrant_provisioner_plugins: "{{ vagrant_sandbox_plugins }}"
-        vagrant_provisioner_boxes: >-
-          {{ (vagrant_sandbox_state in ["absent", "recreated"])
-             | ternary([], vagrant_sandbox_boxes) }}
+        vagrant_provisioner_boxes: "{{ vagrant_sandbox_boxes }}"
         vagrant_provisioner_box_state: present
         vagrant_provisioner_vms: "{{ vagrant_sandbox_vms }}"
         vagrant_provisioner_vms_directory: "{{ vagrant_sandbox_vms_directory }}"
