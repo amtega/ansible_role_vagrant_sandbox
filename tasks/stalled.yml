@@ -19,34 +19,20 @@
         file_type: file
       register: vagrant_sandbox_search_state_files_result
 
-    - block:
-        - name: destroy previous stalled vagrant vm created by same parent ppid
-          include_role:
-            name: amtega.vagrant_provisioner
-          when: >-
-            (lookup("ini", "ppid section=sandbox file=" + item) == ppid
-             and vagrant_sandbox_cleanup_by_ppid)
-            or (lookup("ini", "user section=sandbox file=" + item) == user
-                and vagrant_sandbox_cleanup_by_user)
-            or (lookup("ini",
-                       "playbook section=sandbox file=" + item) == playbook
-                and vagrant_sandbox_cleanup_by_playbook)
-            or (lookup("ini",
-                       "inventory section=sandbox file=" + item) == inventory
-                and vagrant_sandbox_cleanup_by_inventory)
-          with_items: >-
-              {{ vagrant_sandbox_search_state_files_result.files
-                 | map(attribute="path") | list }}
-          vars:
-            vagrant_provisioner_plugins: "{{ vagrant_sandbox_plugins }}"
-            vagrant_provisioner_boxes: "{{ vagrant_sandbox_boxes }}"
-            vagrant_provisioner_vms:
-              - name:  "{{ item | dirname | basename }}"
-                hostname:  "{{ item | dirname | basename }}"
-                directory: "{{ item | dirname }}"
-                state: "absent"
-          loop_control:
-            label: "{{ item | dirname }}"
+    - name: destroy previous stalled vagrant vms
+      include_role:
+        name: amtega.vagrant_provisioner
+      when: >-
+        (lookup("ini", "ppid section=sandbox file=" + item) == ppid
+         and vagrant_sandbox_cleanup_by_ppid)
+        or (lookup("ini", "user section=sandbox file=" + item) == user
+            and vagrant_sandbox_cleanup_by_user)
+        or (lookup("ini",
+                   "playbook section=sandbox file=" + item) == playbook
+            and vagrant_sandbox_cleanup_by_playbook)
+        or (lookup("ini",
+                   "inventory section=sandbox file=" + item) == inventory
+            and vagrant_sandbox_cleanup_by_inventory)
       vars:
         ppid: >-
           {{ lookup("pipe",
@@ -55,6 +41,14 @@
           {{ lookup('pipe', 'echo $USER') | trim }}
         playbook: "{{ vagrant_sandbox_playbook }}"
         inventory: "{{ vagrant_sandbox_inventory }}"
+        vagrant_sandbox_state_files: >-
+          {{ vagrant_sandbox_search_state_files_result.files
+             | map(attribute="path")
+             | list }}
+        vagrant_provisioner_plugins: []
+        vagrant_provisioner_boxes: []
+        vagrant_provisioner_vms: >-
+          {{ lookup('template', 'vms.j2') | from_yaml }}
   tags:
     - role::vagrant_sandbox
     - role::vagrant_sandbox::stalled
