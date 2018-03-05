@@ -22,17 +22,7 @@
     - name: destroy previous stalled vagrant vms
       include_role:
         name: amtega.vagrant_provisioner
-      when: >-
-        (lookup("ini", "ppid section=sandbox file=" + item) == ppid
-         and vagrant_sandbox_cleanup_by_ppid)
-        or (lookup("ini", "user section=sandbox file=" + item) == user
-            and vagrant_sandbox_cleanup_by_user)
-        or (lookup("ini",
-                   "playbook section=sandbox file=" + item) == playbook
-            and vagrant_sandbox_cleanup_by_playbook)
-        or (lookup("ini",
-                   "inventory section=sandbox file=" + item) == inventory
-            and vagrant_sandbox_cleanup_by_inventory)
+      when: vagrant_provisioner_vms | length > 0
       vars:
         ppid: >-
           {{ lookup("pipe",
@@ -48,7 +38,7 @@
         vagrant_provisioner_plugins: []
         vagrant_provisioner_boxes: []
         vagrant_provisioner_vms: >-
-          {{ lookup('template', 'vms.j2') | from_yaml }}
+          {{ lookup('template', 'stalled_vms.j2') | from_yaml }}
   tags:
     - role::vagrant_sandbox
     - role::vagrant_sandbox::stalled

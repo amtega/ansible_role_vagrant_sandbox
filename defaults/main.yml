@@ -22,6 +22,11 @@ vagrant_sandbox_vms: []
 
 vagrant_sandbox_vms_directory: "~/.vagrant_sandbox"
 
+# Bootstrap provisioned vms with a playbook that setups minimum requirements to
+# run ansible
+
+vagrant_sandbox_vms_bootstrap: true
+
 # Group to put in the sandbox provisioned vms
 
 vagrant_sandbox_group: vagrant_sandbox_vms

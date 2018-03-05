@@ -1,6 +1,0 @@
-{% for f in vagrant_sandbox_state_files %}
-- name:  "{{ f | dirname | basename }}"
-  hostname:  "{{ f | dirname | basename }}"
-  directory: "{{ f | dirname }}"
-  state: "absent"
-{% endfor %}
