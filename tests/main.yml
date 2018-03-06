@@ -67,6 +67,7 @@
       vagrant_sandbox_state: started
       vagrant_sandbox_inventory: >-
         {{ playbook_dir }}/vagrant_sandbox_inventory.tmp
+      vagrant_sandbox_group: vagrant_sandbox_vms_cleanup_by_inventory
       vagrant_sandbox_idempotence_test: false
       vagrant_sandbox_cleanup_by_ppid: false
       vagrant_sandbox_cleanup_by_user: false
@@ -98,6 +99,7 @@
       vagrant_sandbox_boxes: "{{ boxes_inventory_2 }}"
       vagrant_sandbox_vms: "{{ vms_inventory_2 }}"
       vagrant_sandbox_state: absent
+      vagrant_sandbox_group: vagrant_sandbox_vms_explicit_absent
       vagrant_sandbox_inventory: >-
         {{ playbook_dir }}/vagrant_sandbox_inventory.tmp
   tasks:
@@ -245,7 +247,7 @@
       vagrant_sandbox_boxes: "{{ boxes_inventory_6 }}"
       vagrant_sandbox_vms: "{{ vms_inventory_6 }}"
       vagrant_sandbox_state: started
-      vagrant_sandbox_group: vagrant_sandbox_vms
+      vagrant_sandbox_group: vagrant_sandbox_vms_cleanup_by_playbook
       vagrant_sandbox_idempotence_test: false
       vagrant_sandbox_cleanup_by_ppid: false
       vagrant_sandbox_cleanup_by_user: false
