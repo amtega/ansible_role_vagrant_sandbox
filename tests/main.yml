@@ -51,7 +51,7 @@
       vagrant_sandbox_state: started
       vagrant_sandbox_inventory: >-
         {{ playbook_dir }}/vagrant_sandbox_inventory.tmp
-      vagrant_sandbox_group: vagrant_sandbox_vms_inventory
+      vagrant_sandbox_group: vagrant_sandbox_vms_disable_idempotence
       vagrant_sandbox_idempotence_test: false
       vagrant_sandbox_cleanup_by_ppid: true
       vagrant_sandbox_cleanup_by_user: true
@@ -130,7 +130,7 @@
       vagrant_sandbox_boxes: "{{ boxes_inventory_3 }}"
       vagrant_sandbox_vms: "{{ vms_inventory_3 }}"
       vagrant_sandbox_state: started
-      vagrant_sandbox_group: vagrant_sandbox_vms_1
+      vagrant_sandbox_group: vagrant_sandbox_vms
       vagrant_sandbox_idempotence_test_recreate_after: true
   tasks:
     - name: assert that idempotence test was ok
@@ -138,7 +138,7 @@
         that: not vagrant_sandbox_idempotence_result | failed
 
 - name: test that vms were recreated after running idempotence test
-  hosts: vagrant_sandbox_vms_1
+  hosts: vagrant_sandbox_vms
   tasks:
     - name: check /tmp/testfile file
       stat:
@@ -156,11 +156,11 @@
       vagrant_sandbox_boxes: "{{ boxes_inventory_3 }}"
       vagrant_sandbox_vms: "{{ vms_inventory_3 }}"
       vagrant_sandbox_state: recreated
-      vagrant_sandbox_group: vagrant_sandbox_vms_1
+      vagrant_sandbox_group: vagrant_sandbox_vms
       vagrant_sandbox_idempotence_test_recreate_after: false
 
 - name: test that vms were not recreated after idempotence test
-  hosts: vagrant_sandbox_vms_1
+  hosts: vagrant_sandbox_vms
   tasks:
     - name: check /tmp/testfile file
       stat:
@@ -183,7 +183,7 @@
       vagrant_sandbox_boxes: "{{ boxes_inventory_4 }}"
       vagrant_sandbox_vms: "{{ vms_inventory_4 }}"
       vagrant_sandbox_state: started
-      vagrant_sandbox_group: vagrant_sandbox_vms_2
+      vagrant_sandbox_group: vagrant_sandbox_vms_cleanup_by_ppid
       vagrant_sandbox_idempotence_test: false
       vagrant_sandbox_cleanup_by_ppid: true
       vagrant_sandbox_cleanup_by_user: false
@@ -214,7 +214,7 @@
       vagrant_sandbox_boxes: "{{ boxes_inventory_5 }}"
       vagrant_sandbox_vms: "{{ vms_inventory_5 }}"
       vagrant_sandbox_state: started
-      vagrant_sandbox_group: vagrant_sandbox_vms_3
+      vagrant_sandbox_group: vagrant_sandbox_vms_cleanup_by_user
       vagrant_sandbox_idempotence_test: false
       vagrant_sandbox_cleanup_by_ppid: false
       vagrant_sandbox_cleanup_by_user: true
@@ -245,7 +245,7 @@
       vagrant_sandbox_boxes: "{{ boxes_inventory_6 }}"
       vagrant_sandbox_vms: "{{ vms_inventory_6 }}"
       vagrant_sandbox_state: started
-      vagrant_sandbox_group: vagrant_sandbox_vms_4
+      vagrant_sandbox_group: vagrant_sandbox_vms
       vagrant_sandbox_idempotence_test: false
       vagrant_sandbox_cleanup_by_ppid: false
       vagrant_sandbox_cleanup_by_user: false
@@ -270,7 +270,7 @@
            | list }}
 
 - name: create file for testing
-  hosts: vagrant_sandbox_vms_1
+  hosts: vagrant_sandbox_vms
   tasks:
     - name: create testing file
       copy:
