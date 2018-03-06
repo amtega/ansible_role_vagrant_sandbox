@@ -18,6 +18,7 @@
             dest: >-
               {{ vagrant_sandbox_vms_directory }}/{{ vm.name }}/sandbox.ini
             force: yes
+            mode: 0600
           register: vagrant_sandbox_create_vagrantfile_result
           with_items: "{{ vagrant_sandbox_vms }}"
           loop_control:
