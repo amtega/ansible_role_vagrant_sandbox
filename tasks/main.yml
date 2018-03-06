@@ -1,2 +1,38 @@
 ---
 # Role tasks
+
+- name: verify sandbox parameters
+  import_tasks: verify.yml
+  tags:
+    - role::vagrant_sandbox
+    - role::vagrant_sandbox::verify
+
+- name: load sandbox presets
+  import_tasks: presets.yml
+  tags:
+    - role::vagrant_sandbox
+    - role::vagrant_sandbox::presets
+
+- name: manage stalled containers
+  import_tasks: stalled.yml
+  tags:
+    - role::vagrant_sandbox
+    - role::vagrant_sandbox::stalled
+
+- name: setup sandbox inventory
+  import_tasks: inventory.yml
+  tags:
+    - role::vagrant_sandbox
+    - role::vagrant_sandbox::inventory
+
+- name: setup sandbox environment
+  import_tasks: provision.yml
+  tags:
+    - role::vagrant_sandbox
+    - role::vagrant_sandbox::provision
+
+- name: run idempotence test
+  import_tasks: idempotence.yml
+  tags:
+    - role::vagrant_sandbox
+    - role::vagrant_sandbox::idempotence

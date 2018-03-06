@@ -1,0 +1,68 @@
+---
+# Vagrant provision tasks
+
+- block:
+    - block:
+        - name: create directory for vagrant sandbox state file
+          file:
+            path: "{{ vagrant_sandbox_vms_directory }}/{{ vm.name }}"
+            state: directory
+          with_items: "{{ vagrant_sandbox_vms }}"
+          loop_control:
+            loop_var: "vm"
+            label: "{{ vm.name }}"
+
+        - name: create vagrant sandbox state file
+          template:
+            src: sandbox.ini.j2
+            dest: >-
+              {{ vagrant_sandbox_vms_directory }}/{{ vm.name }}/sandbox.ini
+            force: yes
+            mode: 0600
+          register: vagrant_sandbox_create_vagrantfile_result
+          with_items: "{{ vagrant_sandbox_vms }}"
+          loop_control:
+            loop_var: "vm"
+            label: "{{ vm.name }}"
+          vars:
+            ppid: >-
+              {{ lookup('pipe', 'ps -o ppid= -p `ps -o ppid= -p $PPID`') | trim }}
+            user: >-
+              {{ lookup('pipe', 'echo $USER') | trim }}
+            playbook: "{{ vagrant_sandbox_playbook }}"
+            inventory: "{{ vagrant_sandbox_inventory }}"
+
+        - name: setup vagrant provisioning playbook
+          template:
+            src: bootstrap.yml.j2
+            dest: >-
+              {{ vagrant_sandbox_vms_directory }}/{{ vm.name }}/bootstrap.yml
+            force: yes
+          when: vagrant_sandbox_vms_bootstrap
+          with_items: "{{ vagrant_sandbox_vms }}"
+          loop_control:
+            loop_var: "vm"
+            label: "{{ vm.name }}"
+      when: vagrant_sandbox_state in ["started", "recreated"]
+
+    - name: provisione vagrant sandbox environment
+      include_role:
+        name: amtega.vagrant_provisioner
+      vars:
+        vagrant_provisioner_plugins: "{{ vagrant_sandbox_plugins }}"
+        vagrant_provisioner_boxes: "{{ vagrant_sandbox_boxes }}"
+        vagrant_provisioner_box_state: present
+        vagrant_provisioner_vms: "{{ vagrant_sandbox_vms }}"
+        vagrant_provisioner_vms_directory: "{{ vagrant_sandbox_vms_directory }}"
+        vagrant_provisioner_vm_groups: ["{{ vagrant_sandbox_group }}"]
+        vagrant_provisioner_inventory: >-
+          {{ (vagrant_sandbox_state in ["started", "recreated"])
+             | ternary(vagrant_sandbox_inventory, "") }}
+        vagrant_provisioner_vm_state: >-
+          {{ (vagrant_sandbox_state in ["recreated"])
+             | ternary("started", vagrant_sandbox_state) }}
+        vagrant_provisioner_vm_playbook: >-
+          {{ (vagrant_sandbox_vms_bootstrap) | ternary("bootstrap.yml", "") }}
+  tags:
+    - role::vagrant_sandbox
+    - role::vagrant_sandbox::provision

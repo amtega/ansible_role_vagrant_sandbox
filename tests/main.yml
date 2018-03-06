@@ -1,2 +1,335 @@
 ---
-# Tasks for tesing role
+# Tasks for testing role
+
+- name: load vagrant presets and configure sanboxes
+  hosts: localhost
+  roles:
+    - role: amtega.vagrant_presets
+  tasks:
+    - name: setup sandbox config for explicit inventory file test 1
+      set_fact:
+        boxes_inventory_1: "{{ vagrant_presets_boxes }}"
+        vms_inventory_1: >-
+         {{ vagrant_presets_vms | vagrant_presets_randomize_names }}
+
+    - name: setup sandbox config for explicit inventory file test 2
+      set_fact:
+        boxes_inventory_2: "{{ vagrant_presets_boxes }}"
+        vms_inventory_2: >-
+          {{ vagrant_presets_vms | vagrant_presets_randomize_names }}
+
+    - name: setup sandbox config for automatic inventory file tests 1
+      set_fact:
+        boxes_inventory_3: "{{ vagrant_presets_boxes }}"
+        vms_inventory_3: >
+          {{ vagrant_presets_vms | vagrant_presets_randomize_names }}
+
+    - name: setup sandbox config for automatic inventory file tests 2
+      set_fact:
+        boxes_inventory_4: "{{ vagrant_presets_boxes }}"
+        vms_inventory_4: >
+          {{ vagrant_presets_vms | vagrant_presets_randomize_names }}
+
+    - name: setup sandbox config for automatic inventory file tests 3
+      set_fact:
+        boxes_inventory_5: "{{ vagrant_presets_boxes }}"
+        vms_inventory_5: >
+          {{ vagrant_presets_vms | vagrant_presets_randomize_names }}
+
+    - name: setup sandbox config for automatic inventory file tests 4
+      set_fact:
+        boxes_inventory_6: "{{ vagrant_presets_boxes }}"
+        vms_inventory_6: >
+          {{ vagrant_presets_vms | vagrant_presets_randomize_names }}
+
+- name: test disabling idempotence check
+  hosts: localhost
+  roles:
+    - role: amtega.vagrant_sandbox
+      vagrant_sandbox_boxes: "{{ boxes_inventory_1 }}"
+      vagrant_sandbox_vms: "{{ vms_inventory_1 }}"
+      vagrant_sandbox_state: started
+      vagrant_sandbox_inventory: >-
+        {{ playbook_dir }}/vagrant_sandbox_inventory.tmp
+      vagrant_sandbox_group: vagrant_sandbox_vms_disable_idempotence
+      vagrant_sandbox_idempotence_test: false
+      vagrant_sandbox_cleanup_by_ppid: true
+      vagrant_sandbox_cleanup_by_user: true
+      vagrant_sandbox_cleanup_by_playbook: true
+      vagrant_sandbox_cleanup_by_inventory: true
+
+- name: test cleanup by inventory file
+  hosts: localhost
+  roles:
+    - role: amtega.vagrant_sandbox
+      vagrant_sandbox_boxes: "{{ boxes_inventory_2 }}"
+      vagrant_sandbox_vms: "{{ vms_inventory_2 }}"
+      vagrant_sandbox_state: started
+      vagrant_sandbox_inventory: >-
+        {{ playbook_dir }}/vagrant_sandbox_inventory.tmp
+      vagrant_sandbox_idempotence_test: false
+      vagrant_sandbox_cleanup_by_ppid: false
+      vagrant_sandbox_cleanup_by_user: false
+      vagrant_sandbox_cleanup_by_playbook: false
+      vagrant_sandbox_cleanup_by_inventory: true
+  tasks:
+    - name: search running vagrant vms created by the test
+      shell: >-
+        vagrant global-status --machine-readable
+        | grep "{{ vagrant_sandbox_vms_directory | expanduser }}"
+        | cut -f 5 -d','
+      changed_when: false
+      register: search_test_vms_result
+
+    - name: verify only running vagrant vms are the last ones created
+      assert:
+        that: >-
+          item in vms_inventory_2 | map(attribute='name') | list
+      with_items: >-
+        {{ search_test_vms_result.stdout_lines
+           | map("basename")
+           | map("trim")
+           | list }}
+
+- name: test explicit cleanup with absent state
+  hosts: localhost
+  roles:
+    - role: amtega.vagrant_sandbox
+      vagrant_sandbox_boxes: "{{ boxes_inventory_2 }}"
+      vagrant_sandbox_vms: "{{ vms_inventory_2 }}"
+      vagrant_sandbox_state: absent
+      vagrant_sandbox_inventory: >-
+        {{ playbook_dir }}/vagrant_sandbox_inventory.tmp
+  tasks:
+    - name: search running vagrant vms created by the test
+      shell: >-
+        vagrant global-status --machine-readable
+        | grep "{{ vagrant_sandbox_vms_directory | expanduser }}"
+        | cut -f 5 -d','
+      changed_when: false
+      register: search_test_vms_result
+
+    - name: verify there are not running test vagrant vms
+      assert:
+        that:  search_test_vms_result.stdout_lines | length == 0
+
+    - name: search explicit inventory from previous test
+      stat:
+        path: "{{ playbook_dir }}/vagrant_sandbox_inventory.tmp"
+      register: check_inventory_result
+
+    - name: check explicit inventory from previous test does not exist
+      assert:
+        that:
+          - not check_inventory_result.stat.exists
+
+- name: test enabling recreation after idempotence test
+  hosts: localhost
+  roles:
+    - role: amtega.vagrant_sandbox
+      vagrant_sandbox_boxes: "{{ boxes_inventory_3 }}"
+      vagrant_sandbox_vms: "{{ vms_inventory_3 }}"
+      vagrant_sandbox_state: started
+      vagrant_sandbox_group: vagrant_sandbox_vms
+      vagrant_sandbox_idempotence_test_recreate_after: true
+  tasks:
+    - name: assert that idempotence test was ok
+      assert:
+        that: not vagrant_sandbox_idempotence_result | failed
+
+- name: test that vms were recreated after running idempotence test
+  hosts: vagrant_sandbox_vms
+  tasks:
+    - name: check /tmp/testfile file
+      stat:
+        path: /tmp/testfile
+      register: check_testfile_result
+
+    - name: check testfile file does not exist
+      assert:
+        that: not check_testfile_result.stat.exists
+
+- name: test disabling vms recreation after idempotence test
+  hosts: localhost
+  roles:
+    - role: amtega.vagrant_sandbox
+      vagrant_sandbox_boxes: "{{ boxes_inventory_3 }}"
+      vagrant_sandbox_vms: "{{ vms_inventory_3 }}"
+      vagrant_sandbox_state: recreated
+      vagrant_sandbox_group: vagrant_sandbox_vms
+      vagrant_sandbox_idempotence_test_recreate_after: false
+
+- name: test that vms were not recreated after idempotence test
+  hosts: vagrant_sandbox_vms
+  tasks:
+    - name: check /tmp/testfile file
+      stat:
+        path: /tmp/testfile
+      register: check_testfile_result
+
+    - name: check /tmp/testfile file exists
+      assert:
+        that: check_testfile_result.stat.exists
+
+    - name: emtpy sandbox boxes and vms facts to prepare next test
+      set_fact:
+        vagrant_sandbox_boxes: []
+        vagrant_sandbox_vms: []
+
+- name: test cleanup by ppid
+  hosts: localhost
+  roles:
+    - role: amtega.vagrant_sandbox
+      vagrant_sandbox_boxes: "{{ boxes_inventory_4 }}"
+      vagrant_sandbox_vms: "{{ vms_inventory_4 }}"
+      vagrant_sandbox_state: started
+      vagrant_sandbox_group: vagrant_sandbox_vms_cleanup_by_ppid
+      vagrant_sandbox_idempotence_test: false
+      vagrant_sandbox_cleanup_by_ppid: true
+      vagrant_sandbox_cleanup_by_user: false
+      vagrant_sandbox_cleanup_by_playbook: false
+  tasks:
+    - name: search running vagrant vms created by the test
+      shell: >-
+        vagrant global-status --machine-readable
+        | grep "{{ vagrant_sandbox_vms_directory | expanduser }}"
+        | cut -f 5 -d','
+      changed_when: false
+      register: search_test_vms_result
+
+    - name: verify only running vagrant vms are the last ones created
+      assert:
+        that: >-
+          item in vms_inventory_4 | map(attribute='name') | list
+      with_items: >-
+        {{ search_test_vms_result.stdout_lines
+           | map("basename")
+           | map("trim")
+           | list }}
+
+- name: test cleanup by user
+  hosts: localhost
+  roles:
+    - role: amtega.vagrant_sandbox
+      vagrant_sandbox_boxes: "{{ boxes_inventory_5 }}"
+      vagrant_sandbox_vms: "{{ vms_inventory_5 }}"
+      vagrant_sandbox_state: started
+      vagrant_sandbox_group: vagrant_sandbox_vms_cleanup_by_user
+      vagrant_sandbox_idempotence_test: false
+      vagrant_sandbox_cleanup_by_ppid: false
+      vagrant_sandbox_cleanup_by_user: true
+      vagrant_sandbox_cleanup_by_playbook: false
+  tasks:
+    - name: search running vagrant vms created by the test
+      shell: >-
+        vagrant global-status --machine-readable
+        | grep "{{ vagrant_sandbox_vms_directory | expanduser }}"
+        | cut -f 5 -d','
+      changed_when: false
+      register: search_test_vms_result
+
+    - name: verify only running vagrant vms are the last ones created
+      assert:
+        that: >-
+          item in vms_inventory_5 | map(attribute='name') | list
+      with_items: >-
+        {{ search_test_vms_result.stdout_lines
+           | map("basename")
+           | map("trim")
+           | list }}
+
+- name: test cleanup by playbook
+  hosts: localhost
+  roles:
+    - role: amtega.vagrant_sandbox
+      vagrant_sandbox_boxes: "{{ boxes_inventory_6 }}"
+      vagrant_sandbox_vms: "{{ vms_inventory_6 }}"
+      vagrant_sandbox_state: started
+      vagrant_sandbox_group: vagrant_sandbox_vms
+      vagrant_sandbox_idempotence_test: false
+      vagrant_sandbox_cleanup_by_ppid: false
+      vagrant_sandbox_cleanup_by_user: false
+      vagrant_sandbox_cleanup_by_playbook: true
+  tasks:
+    - name: search running vagrant vms created by the test
+      shell: >-
+        vagrant global-status --machine-readable
+        | grep "{{ vagrant_sandbox_vms_directory | expanduser }}"
+        | cut -f 5 -d','
+      changed_when: false
+      register: search_test_vms_result
+
+    - name: verify only running vagrant vms are the last ones created
+      assert:
+        that: >-
+          item in vms_inventory_6 | map(attribute='name') | list
+      with_items: >-
+        {{ search_test_vms_result.stdout_lines
+           | map("basename")
+           | map("trim")
+           | list }}
+
+- name: create file for testing
+  hosts: vagrant_sandbox_vms
+  tasks:
+    - name: create testing file
+      copy:
+        content: "Hello World"
+        dest: /tmp/testfile
+        force: no
+  tags:
+    - idempotence
+
+- name: cleanup vagrant vagrant sandbox
+  hosts: localhost
+  roles:
+    - role: amtega.vagrant_sandbox
+      vagrant_sandbox_boxes: >-
+        {{ boxes_inventory_3
+           | union(boxes_inventory_4)
+           | union(boxes_inventory_5)
+           | union(boxes_inventory_6) }}
+      vagrant_sandbox_vms: >-
+        {{ vms_inventory_3
+           | union(vms_inventory_4)
+           | union(vms_inventory_5)
+           | union(vms_inventory_6) }}
+      vagrant_sandbox_state: absent
+  tasks:
+    - name: search running vagrant vms
+      shell: >-
+        vagrant global-status --machine-readable
+        | grep "{{ vagrant_sandbox_vms_directory | expanduser }}"
+        | cut -f 5 -d','
+      changed_when: false
+      register: search_test_vms_result
+
+    - name: verify there are not running test vagrant vms
+      assert:
+       that: >-
+        item not in vms_inventory_1
+                    | union(vms_inventory_2)
+                    | union(vms_inventory_3)
+                    | union(vms_inventory_4)
+                    | union(vms_inventory_5)
+                    | union(vms_inventory_6)
+                    | map(attribute='name')
+                    | list
+      with_items: "{{ search_test_vms_result.stdout_lines }}"
+
+    - name: verify there are not running test vagrant vms
+      assert:
+        that: >-
+          item in  vms_inventory_1
+                   | union(vms_inventory_2)
+                   | union(vms_inventory_3)
+                   | union(vms_inventory_4)
+                   | union(vms_inventory_5)
+                   | union(vms_inventory_6)
+                   | map(attribute='name')
+                   | list
+      with_items: >-
+        {{ search_test_vms_result.stdout_lines
+           | map("basename")
+           | map("trim")
+           | list }}

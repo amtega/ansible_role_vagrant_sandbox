@@ -1,0 +1,44 @@
+---
+# Stalled vms managament tasks
+
+- block:
+    - name: get playbook file
+      vagrant_sandbox_playbook:
+      register: vagrant_sandbox_get_playbook_result
+
+    - name: setup fact with full playbook path
+      set_fact:
+        vagrant_sandbox_playbook: >-
+          {{ playbook_dir }}/{{ vagrant_sandbox_get_playbook_result.playbook }}
+
+    - name: search sanbox state files
+      find:
+        paths: "{{ vagrant_sandbox_vms_directory | expanduser }}"
+        recurse: yes
+        patterns: "sandbox.ini"
+        file_type: file
+      register: vagrant_sandbox_search_state_files_result
+
+    - name: destroy previous stalled vagrant vms
+      include_role:
+        name: amtega.vagrant_provisioner
+      when: vagrant_provisioner_vms | length > 0
+      vars:
+        ppid: >-
+          {{ lookup("pipe",
+                    "ps -o ppid= -p `ps -o ppid= -p $PPID`") | trim }}
+        user: >-
+          {{ lookup('pipe', 'echo $USER') | trim }}
+        playbook: "{{ vagrant_sandbox_playbook }}"
+        inventory: "{{ vagrant_sandbox_inventory }}"
+        vagrant_sandbox_state_files: >-
+          {{ vagrant_sandbox_search_state_files_result.files
+             | map(attribute="path")
+             | list }}
+        vagrant_provisioner_plugins: []
+        vagrant_provisioner_boxes: []
+        vagrant_provisioner_vms: >-
+          {{ lookup('template', 'stalled_vms.j2') | from_yaml }}
+  tags:
+    - role::vagrant_sandbox
+    - role::vagrant_sandbox::stalled
