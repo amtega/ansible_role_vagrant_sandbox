@@ -10,5 +10,5 @@
         (if not given will try to cleanup all vagrant sandboxes)
       private: no
   roles:
-    - role: vagrant_sandbox
+    - role: amtega.vagrant_sandbox
       vagrant_sandbox_state: absent

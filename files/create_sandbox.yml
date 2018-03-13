@@ -10,8 +10,8 @@
         (if not given a random one will be created)
       private: no
   roles:
-    - role: vagrant_presets
-    - role: vagrant_sandbox
+    - role: amtega.vagrant_presets
+    - role: amtega.vagrant_sandbox
       vagrant_sandbox_state: started
       vagrant_sandbox_idempotence_test: false
       vagrant_sandbox_cleanup_by_ppid: false
