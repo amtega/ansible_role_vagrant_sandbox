@@ -151,7 +151,7 @@
       assert:
         that: not check_testfile_result.stat.exists
 
-- name: resresh inventory
+- name: refresh inventory
   hosts: localhost
   tasks:
     - meta: refresh_inventory
@@ -183,7 +183,7 @@
         vagrant_sandbox_boxes: []
         vagrant_sandbox_vms: []
 
-- name: resresh inventory
+- name: refresh inventory
   hosts: localhost
   tasks:
     - meta: refresh_inventory
