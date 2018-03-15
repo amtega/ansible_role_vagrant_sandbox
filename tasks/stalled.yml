@@ -25,8 +25,7 @@
       when: vagrant_provisioner_vms | length > 0
       vars:
         ppid: >-
-          {{ lookup("pipe",
-                    "ps -o ppid= -p `ps -o ppid= -p $PPID`") | trim }}
+          {{ lookup("pipe", "echo $PPID") | trim }}
         user: >-
           {{ lookup('pipe', 'echo $USER') | trim }}
         playbook: "{{ vagrant_sandbox_playbook }}"
