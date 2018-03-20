@@ -32,19 +32,6 @@
             playbook: "{{ vagrant_sandbox_playbook }}"
             inventory: "{{ vagrant_sandbox_inventory }}"
 
-        - name: setup vagrant provisioning playbook
-          template:
-            src: bootstrap.yml.j2
-            dest: >-
-              {{ vagrant_sandbox_vms_directory }}/{{ vm.name }}/bootstrap.yml
-            force: yes
-          when: vagrant_sandbox_vms_bootstrap
-          with_items: "{{ vagrant_sandbox_vms }}"
-          loop_control:
-            loop_var: "vm"
-            label: "{{ vm.name }}"
-      when: vagrant_sandbox_state in ["started", "recreated"]
-
     - name: provisione vagrant sandbox environment
       include_role:
         name: amtega.vagrant_provisioner
@@ -65,8 +52,6 @@
         vagrant_provisioner_vm_state: >-
           {{ (vagrant_sandbox_state in ["recreated"])
              | ternary("started", vagrant_sandbox_state) }}
-        vagrant_provisioner_vm_playbook: >-
-          {{ (vagrant_sandbox_vms_bootstrap) | ternary("bootstrap.yml", "") }}
   tags:
     - role::vagrant_sandbox
     - role::vagrant_sandbox::provision
