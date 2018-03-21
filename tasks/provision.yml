@@ -52,6 +52,9 @@
         vagrant_provisioner_vm_state: >-
           {{ (vagrant_sandbox_state in ["recreated"])
              | ternary("started", vagrant_sandbox_state) }}
+        vagrant_provisioner_vm_ansible_ssh_common_args: >-
+          -o UserKnownHostsFile=/dev/null
+          -o StrictHostKeyChecking=no
   tags:
     - role::vagrant_sandbox
     - role::vagrant_sandbox::provision
