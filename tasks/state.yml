@@ -6,7 +6,7 @@
       file:
         path: "{{ vagrant_sandbox_vms_directory }}/{{ vm.name }}"
         state: directory
-      with_items: "{{ vagrant_sandbox_vms }}"
+      loop: "{{ vagrant_sandbox_vms }}"
       loop_control:
         loop_var: "vm"
         label: "{{ vm.name }}"
@@ -19,7 +19,7 @@
         force: yes
         mode: 0600
       register: vagrant_sandbox_create_vagrantfile_result
-      with_items: "{{ vagrant_sandbox_vms }}"
+      loop: "{{ vagrant_sandbox_vms }}"
       loop_control:
         loop_var: "vm"
         label: "{{ vm.name }}"

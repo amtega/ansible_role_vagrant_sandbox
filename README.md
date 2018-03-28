@@ -6,7 +6,7 @@ The role will provisione a vagrant based sandbox and run idempotence tests on th
 
 ## Requirements
 
-[Ansible 2.4+](http://docs.ansible.com/ansible/latest/intro_installation.html)
+[Ansible 2.5+](http://docs.ansible.com/ansible/latest/intro_installation.html)
 
 ## Role Variables
 
@@ -41,7 +41,7 @@ This is an example playbook:
   tasks:
     - name: assert that idempotence test was ok
       assert:
-        that: not vagrant_sandbox_idempotence_result | failed
+        that: not vagrant_sandbox_idempotence_result is failed
 
 - name: simple idempotence test
   hosts: vagrant_sandbox_vms
