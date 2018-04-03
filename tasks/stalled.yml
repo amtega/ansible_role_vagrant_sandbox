@@ -6,34 +6,43 @@
       vagrant_sandbox_playbook:
       register: vagrant_sandbox_get_playbook_result
 
+    - name: get partent process id
+      shell: "echo $PPID"
+      changed_when: false
+      register: vagrant_sandbox_get_ppid_result
+
     - name: setup fact with full playbook path
       set_fact:
         vagrant_sandbox_playbook: >-
           {{ playbook_dir }}/{{ vagrant_sandbox_get_playbook_result.playbook }}
 
-    - name: search sanbox state files
+    - name: search sandbox state files
       find:
         paths: "{{ vagrant_sandbox_vms_directory | expanduser }}"
         recurse: yes
-        patterns: "sandbox.ini"
+        patterns: "sandbox.yml"
         file_type: file
       register: vagrant_sandbox_search_state_files_result
+
+    - name: load sandbox state files info
+      include_vars:
+        file: "{{ item }}"
+        name: >-
+          vagrant_provisioner_state_{{ item | dirname | basename }}
+      loop: >-
+        {{ vagrant_sandbox_search_state_files_result.files
+           | map(attribute="path")
+           | list }}
 
     - name: destroy previous stalled vagrant vms
       include_role:
         name: amtega.vagrant_provisioner
       when: vagrant_provisioner_vms | length > 0
       vars:
-        ppid: >-
-          {{ lookup("pipe", "echo $PPID") | trim }}
-        user: >-
-          {{ lookup('pipe', 'echo $USER') | trim }}
+        ppid: "{{ vagrant_sandbox_get_ppid_result.stdout }}"
+        user: "{{ ansible_user_id }}"
         playbook: "{{ vagrant_sandbox_playbook }}"
         inventory: "{{ vagrant_sandbox_inventory }}"
-        vagrant_sandbox_state_files: >-
-          {{ vagrant_sandbox_search_state_files_result.files
-             | map(attribute="path")
-             | list }}
         vagrant_provisioner_plugins: []
         vagrant_provisioner_boxes: []
         vagrant_provisioner_vms: >-
