@@ -6,11 +6,6 @@
       vagrant_sandbox_playbook:
       register: vagrant_sandbox_get_playbook_result
 
-    - name: get partent process id
-      shell: "echo $PPID"
-      changed_when: false
-      register: vagrant_sandbox_get_ppid_result
-
     - name: setup fact with full playbook path
       set_fact:
         vagrant_sandbox_playbook: >-

@@ -13,6 +13,11 @@
     - role::vagrant_sandbox
     - role::vagrant_sandbox::presets
 
+- name: get parent process id
+  import_tasks: ppid.yml
+  tags:
+    - role::vagrant_sandbox
+
 - name: manage stalled containers
   import_tasks: stalled.yml
   when: vagrant_sandbox_state == "started"
