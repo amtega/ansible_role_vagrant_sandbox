@@ -22,7 +22,8 @@
             vagrant_provisioner_plugins: []
             vagrant_provisioner_boxes: "{{ vagrant_sandbox_boxes }}"
             vagrant_provisioner_vms: "{{ vagrant_sandbox_vms }}"
-            vagrant_provisioner_vms_directory: "{{ vagrant_sandbox_vms_directory }}"
+            vagrant_provisioner_vms_directory: >-
+              {{ vagrant_sandbox_vms_directory }}
             vagrant_provisioner_inventory: "{{ vagrant_sandbox_inventory }}"
             vagrant_provisioner_vm_state: absent
 

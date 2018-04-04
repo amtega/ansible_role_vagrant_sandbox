@@ -1,0 +1,33 @@
+---
+# Vagrant provision tasks
+
+- block:
+    - name: create directory for vagrant sandbox state file
+      file:
+        path: "{{ vagrant_sandbox_vms_directory }}/{{ vm.name }}"
+        state: directory
+      loop: "{{ vagrant_sandbox_vms }}"
+      loop_control:
+        loop_var: "vm"
+        label: "{{ vm.name }}"
+
+    - name: create vagrant sandbox state file
+      template:
+        src: sandbox.yml.j2
+        dest: >-
+          {{ vagrant_sandbox_vms_directory }}/{{ vm.name }}/sandbox.yml
+        force: yes
+        mode: 0600
+      register: vagrant_sandbox_create_vagrantfile_result
+      loop: "{{ vagrant_sandbox_vms }}"
+      loop_control:
+        loop_var: "vm"
+        label: "{{ vm.name }}"
+      vars:
+        ppid: "{{ vagrant_sandbox_get_ppid_result.stdout }}"
+        user: "{{ ansible_user_id }}"
+        playbook: "{{ vagrant_sandbox_playbook }}"
+        inventory: "{{ vagrant_sandbox_inventory }}"
+  tags:
+    - role::vagrant_sandbox
+    - role::vagrant_sandbox::provision

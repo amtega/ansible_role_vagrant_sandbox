@@ -1,0 +1,9 @@
+---
+# Tasks to get parent process id
+
+- name: get parent process id
+  shell: "echo $PPID"
+  changed_when: false
+  register: vagrant_sandbox_get_ppid_result
+  tags:
+    - role::vagrant_sandbox

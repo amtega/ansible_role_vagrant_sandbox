@@ -13,8 +13,14 @@
     - role::vagrant_sandbox
     - role::vagrant_sandbox::presets
 
+- name: get parent process id
+  import_tasks: ppid.yml
+  tags:
+    - role::vagrant_sandbox
+
 - name: manage stalled containers
   import_tasks: stalled.yml
+  when: vagrant_sandbox_state == "started"
   tags:
     - role::vagrant_sandbox
     - role::vagrant_sandbox::stalled
@@ -33,6 +39,7 @@
 
 - name: run idempotence test
   import_tasks: idempotence.yml
+  when: vagrant_sandbox_idempotence_test
   tags:
     - role::vagrant_sandbox
     - role::vagrant_sandbox::idempotence

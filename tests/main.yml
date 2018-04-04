@@ -86,7 +86,7 @@
       assert:
         that: >-
           item in vms_inventory_2 | map(attribute='name') | list
-      with_items: >-
+      loop: >-
         {{ search_test_vms_result.stdout_lines
            | map("basename")
            | map("trim")
@@ -213,7 +213,7 @@
       assert:
         that: >-
           item in vms_inventory_4 | map(attribute='name') | list
-      with_items: >-
+      loop: >-
         {{ search_test_vms_result.stdout_lines
            | map("basename")
            | map("trim")
@@ -244,7 +244,7 @@
       assert:
         that: >-
           item in vms_inventory_5 | map(attribute='name') | list
-      with_items: >-
+      loop: >-
         {{ search_test_vms_result.stdout_lines
            | map("basename")
            | map("trim")
@@ -275,7 +275,7 @@
       assert:
         that: >-
           item in vms_inventory_6 | map(attribute='name') | list
-      with_items: >-
+      loop: >-
         {{ search_test_vms_result.stdout_lines
            | map("basename")
            | map("trim")
@@ -327,7 +327,7 @@
                     | union(vms_inventory_6)
                     | map(attribute='name')
                     | list
-      with_items: "{{ search_test_vms_result.stdout_lines }}"
+      loop: "{{ search_test_vms_result.stdout_lines }}"
 
     - name: verify there are not running test vagrant vms
       assert:
@@ -340,7 +340,7 @@
                    | union(vms_inventory_6)
                    | map(attribute='name')
                    | list
-      with_items: >-
+      loop: >-
         {{ search_test_vms_result.stdout_lines
            | map("basename")
            | map("trim")

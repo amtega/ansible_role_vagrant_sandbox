@@ -1,15 +1,15 @@
-{% for file in vagrant_sandbox_state_files %}
-{% if (lookup("ini", "ppid section=sandbox file=" + file) == ppid
-       and vagrant_sandbox_cleanup_by_ppid)
-       or (lookup("ini", "user section=sandbox file=" + file) == user
-           and vagrant_sandbox_cleanup_by_user)
-       or (lookup("ini", "playbook section=sandbox file=" + file) == playbook
-           and vagrant_sandbox_cleanup_by_playbook)
-       or (lookup("ini", "inventory section=sandbox file=" + file) == inventory
-           and vagrant_sandbox_cleanup_by_inventory) %}
-- name:  "{{ file | dirname | basename }}"
-  hostname:  "{{ file | dirname | basename }}"
-  directory: "{{ file | dirname }}"
+{% for state_var in hostvars[inventory_hostname]
+                    | select("search", "vagrant_provisioner_state_.*")
+                    | list %}
+{% set state=hostvars[inventory_hostname][state_var] %}
+{% set vm_name=state_var | regex_replace("vagrant_provisioner_state_", "") %}
+{% if (state.ppid == ppid and vagrant_sandbox_cleanup_by_ppid)
+      or (state.user == user and vagrant_sandbox_cleanup_by_user)
+      or (state.playbook == playbook and vagrant_sandbox_cleanup_by_playbook)
+      or (state.inventory == inventory and vagrant_sandbox_cleanup_by_inventory) %}
+- name: "{{ vm_name }}"
+  hostname: "{{ vm_name | regex_replace('_', '-') }}"
+  directory: "{{ vagrant_sandbox_vms_directory | expanduser }}/{{ vm_name }}"
   state: "absent"
 {% endif %}
 {% endfor %}
