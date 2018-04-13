@@ -9,7 +9,9 @@
             suffix: .inventory
           register: vagrant_sandbox_create_inventory_result
 
-        - name: setup fact with path to vagrant sandbox vms inventory
+        - name: >-
+            setup fact with path to inventory
+            {{ vagrant_sandbox_create_inventory_result.path }}
           set_fact:
             vagrant_sandbox_inventory: >-
               {{ vagrant_sandbox_create_inventory_result.path }}
