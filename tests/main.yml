@@ -1,11 +1,58 @@
 ---
 # Tasks for testing role
 
-- name: load vagrant presets and configure sanboxes
+- name: run idempotence test
   hosts: localhost
   roles:
     - role: amtega.vagrant_presets
+      vagrant_presets_boxes_json_query: >-
+        [? (starts_with(name, `centos-7`))
+           || starts_with(name, `debian-9`)
+           || starts_with(name, `fedora-26`)
+           || starts_with(name, `fedora-27`) ]
+    - role: amtega.vagrant_sandbox
+      vagrant_sandbox_state: started
+  tags:
+    - sandbox
+
+- name: setup software and config requirements in sandbox hosts
+  hosts: vagrant_sandbox_vms
+  serial: 1
+  roles:
+    - amtega.virtualbox_engine
+    - amtega.vagrant_engine
+    - amtega.vagrant_presets
   tasks:
+    - name: install pip
+      package:
+        name: python-pip
+        state: present
+
+    - name: install ansible
+      pip:
+        name: ansible
+        state: latest
+
+    - name: copy playbook to test idempotence
+      copy:
+        src: idempotence.yml
+        dest: /tmp/idempotence.yml
+
+    - name: configure vagrant_provisioner boxes presets
+      set_fact:
+        vagrant_presets_boxes:
+          - "{{ vagrant_presets_boxes | random }}"
+
+    - name: configure vagrant_provisioner vms presets
+      set_fact:
+        vagrant_presets_vms:
+          - >
+            {{ vagrant_presets_vms
+               selectattr("box",
+                          "equalto",
+                          vagrant_provisioner_boxes[0].name)
+               | list }}
+
     - name: setup sandbox config for explicit inventory file test 1
       set_fact:
         boxes_inventory_1: "{{ vagrant_presets_boxes }}"
@@ -41,11 +88,18 @@
         boxes_inventory_6: "{{ vagrant_presets_boxes }}"
         vms_inventory_6: >
           {{ vagrant_presets_vms | vagrant_presets_randomize_names }}
+  vars:
+    container_preset: >-
+      {{ inventory_hostname | regex_replace('(.*_.*)_.*', '\1') }}
+    registry:
+      repository: "{{ host_get_ip_result.stdout }}:5000/{{ container_preset }}"
 
 - name: test disabling idempotence check
-  hosts: localhost
+  hosts: vagrant_sandbox_vms
+  serial: 1
   roles:
     - role: amtega.vagrant_sandbox
+      vagrant_provisioner_mvs_provisioning_method: sequential
       vagrant_sandbox_boxes: "{{ boxes_inventory_1 }}"
       vagrant_sandbox_vms: "{{ vms_inventory_1 }}"
       vagrant_sandbox_state: started
@@ -59,7 +113,8 @@
       vagrant_sandbox_cleanup_by_inventory: true
 
 - name: test cleanup by inventory file
-  hosts: localhost
+  hosts: vagrant_sandbox_vms
+  serial: 1
   roles:
     - role: amtega.vagrant_sandbox
       vagrant_sandbox_boxes: "{{ boxes_inventory_2 }}"
@@ -93,7 +148,8 @@
            | list }}
 
 - name: test explicit cleanup with absent state
-  hosts: localhost
+  hosts: vagrant_sandbox_vms
+  serial: 1
   roles:
     - role: amtega.vagrant_sandbox
       vagrant_sandbox_boxes: "{{ boxes_inventory_2 }}"
@@ -126,13 +182,17 @@
           - not check_inventory_result.stat.exists
 
 - name: test enabling recreation after idempotence test
-  hosts: localhost
+  hosts: vagrant_sandbox_vms
+  serial: 1
   roles:
     - role: amtega.vagrant_sandbox
+      vagrant_provisioner_vms_provisioning_method: sequential
+      idempotence_tester_playbook: /tmp/idempotence.yml
       vagrant_sandbox_boxes: "{{ boxes_inventory_3 }}"
       vagrant_sandbox_vms: "{{ vms_inventory_3 }}"
       vagrant_sandbox_state: started
-      vagrant_sandbox_group: vagrant_sandbox_vms
+      vagrant_sandbox_group: vagrant_sandbox_vms_with_idempotence_recreation
+      vagrant_sandbox_idempotence_test: true
       vagrant_sandbox_idempotence_test_recreate_after: true
   tasks:
     - name: assert that idempotence test was ok
@@ -140,7 +200,7 @@
         that: not vagrant_sandbox_idempotence_result is failed
 
 - name: test that vms were recreated after running idempotence test
-  hosts: vagrant_sandbox_vms
+  hosts: vagrant_sandbox_vms_with_idempotence_recreation
   tasks:
     - name: check /tmp/testfile file
       stat:
@@ -152,22 +212,27 @@
         that: not check_testfile_result.stat.exists
 
 - name: refresh inventory
-  hosts: localhost
+  hosts: vagrant_sandbox_vms
+  serial: 1
   tasks:
     - meta: refresh_inventory
 
 - name: test disabling vms recreation after idempotence test
-  hosts: localhost
+  hosts: vagrant_sandbox_vms
+  serial: 1
   roles:
     - role: amtega.vagrant_sandbox
+      vagrant_provisioner_vms_provisioning_method: sequential
+      idempotence_tester_playbook: /tmp/idempotence.yml
       vagrant_sandbox_boxes: "{{ boxes_inventory_3 }}"
       vagrant_sandbox_vms: "{{ vms_inventory_3 }}"
       vagrant_sandbox_state: recreated
-      vagrant_sandbox_group: vagrant_sandbox_vms
+      vagrant_sandbox_group: vagrant_sandbox_vms_without_idempotence_recreation
+      vagrant_sandbox_idempotence_test: true
       vagrant_sandbox_idempotence_test_recreate_after: false
 
 - name: test that vms were not recreated after idempotence test
-  hosts: vagrant_sandbox_vms
+  hosts: vagrant_sandbox_vms_without_idempotence_recreation
   tasks:
     - name: check /tmp/testfile file
       stat:
@@ -184,14 +249,17 @@
         vagrant_sandbox_vms: []
 
 - name: refresh inventory
-  hosts: localhost
+  hosts: vagrant_sandbox_vms
+  serial: 1
   tasks:
     - meta: refresh_inventory
 
 - name: test cleanup by ppid
-  hosts: localhost
+  hosts: vagrant_sandbox_vms
+  serial: 1
   roles:
     - role: amtega.vagrant_sandbox
+      vagrant_provisioner_mvs_provisioning_method: sequential
       vagrant_sandbox_boxes: "{{ boxes_inventory_4 }}"
       vagrant_sandbox_vms: "{{ vms_inventory_4 }}"
       vagrant_sandbox_state: started
@@ -220,9 +288,11 @@
            | list }}
 
 - name: test cleanup by user
-  hosts: localhost
+  hosts: vagrant_sandbox_vms
+  serial: 1
   roles:
     - role: amtega.vagrant_sandbox
+      vagrant_provisioner_mvs_provisioning_method: sequential
       vagrant_sandbox_boxes: "{{ boxes_inventory_5 }}"
       vagrant_sandbox_vms: "{{ vms_inventory_5 }}"
       vagrant_sandbox_state: started
@@ -251,9 +321,11 @@
            | list }}
 
 - name: test cleanup by playbook
-  hosts: localhost
+  hosts: vagrant_sandbox_vms
+  serial: 1
   roles:
     - role: amtega.vagrant_sandbox
+      vagrant_provisioner_mvs_provisioning_method: sequential
       vagrant_sandbox_boxes: "{{ boxes_inventory_6 }}"
       vagrant_sandbox_vms: "{{ vms_inventory_6 }}"
       vagrant_sandbox_state: started
@@ -281,19 +353,11 @@
            | map("trim")
            | list }}
 
-- name: create file for testing
-  hosts: vagrant_sandbox_vms
-  tasks:
-    - name: create testing file
-      copy:
-        content: "Hello World"
-        dest: /tmp/testfile
-        force: no
-  tags:
-    - idempotence
+- import_playbook: idempotence.yml
 
 - name: cleanup vagrant vagrant sandbox
-  hosts: localhost
+  hosts: vagrant_sandbox_vms
+  serial: 1
   roles:
     - role: amtega.vagrant_sandbox
       vagrant_sandbox_boxes: >-
@@ -345,3 +409,11 @@
            | map("basename")
            | map("trim")
            | list }}
+
+- name: cleanup vagrant sandbox
+  hosts: localhost
+  roles:
+    - role: amtega.vagrant_sandbox
+      vagrant_sandbox_state: absent
+  tags:
+    - sandbox
