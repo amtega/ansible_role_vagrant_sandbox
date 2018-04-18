@@ -20,7 +20,6 @@
 
 - name: manage stalled containers
   import_tasks: stalled.yml
-  when: vagrant_sandbox_state == "started"
   tags:
     - role::vagrant_sandbox
     - role::vagrant_sandbox::stalled
