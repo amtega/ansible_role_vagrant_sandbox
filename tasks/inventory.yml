@@ -6,7 +6,7 @@
         - name: create temporary file to store vagrant sandbox vms inventory
           tempfile:
             state: file
-            suffix: .inventory
+            suffix: .inventory.yml
           register: vagrant_sandbox_create_inventory_result
 
         - name: >-
