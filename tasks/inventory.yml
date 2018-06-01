@@ -9,12 +9,14 @@
             suffix: .inventory.yml
           register: vagrant_sandbox_create_inventory_result
 
-        - name: >-
-            setup fact with path to inventory
-            {{ vagrant_sandbox_create_inventory_result.path }}
+        - name: setup fact with path to inventory
           set_fact:
             vagrant_sandbox_inventory: >-
               {{ vagrant_sandbox_create_inventory_result.path }}
+
+        - name: show inventory file path
+          debug:
+            msg: "{{ vagrant_sandbox_inventory }}"
       when:
         - vagrant_sandbox_state in ["started", "recreated"]
         - >-
