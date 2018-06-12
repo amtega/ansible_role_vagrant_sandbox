@@ -1,19 +1,43 @@
 ---
 # Tasks for testing role
 
-- name: run idempotence test
+- name: configure vagrant sandbox environment
   hosts: localhost
   roles:
     - role: amtega.vagrant_presets
       vagrant_presets_boxes_json_query: >-
         [? (starts_with(name, `centos-7`))
            || starts_with(name, `debian-9`)
-           || starts_with(name, `fedora-26`)
-           || starts_with(name, `fedora-27`) ]
-    - role: amtega.vagrant_sandbox
-      vagrant_sandbox_state: started
+           || starts_with(name, `fedora-27`)
+           || starts_with(name, `fedora-28`) ]
   tags:
     - sandbox
+
+- name: run idempotence test
+  hosts: localhost
+  roles:
+    - role: amtega.vagrant_sandbox
+      vagrant_sandbox_state: started
+      vagrant_provisioner_vm_memory: 1024
+  tags:
+    - sandbox
+
+- name: update kernel in sandbox hosts and reboot them
+  hosts: vagrant_sandbox_vms
+  roles:
+    - amtega.gnu_linux
+  tasks:
+    - name: update kernel
+      package:
+        name: "kernel-*"
+        state: latest
+      notify:
+        - reboot host
+        - wait host
+
+    - meta: flush_handlers
+  tags:
+    - idempotence
 
 - name: setup software and config requirements in sandbox hosts
   hosts: vagrant_sandbox_vms
@@ -46,61 +70,90 @@
       copy:
         src: idempotence.yml
         dest: /tmp/idempotence.yml
-# FIXME:
-    - name: generate vagrant random boxes presets
-      set_fact:
-        vagrant_sandbox_boxes_random:
-          - "{{ vagrant_presets_boxes[0] }}"
 
-    - name: generate vagrant random virtual machine presets
+    - name: setup bootstrap playbook
+      copy:
+        src: bootstrap.yml
+        dest: /tmp
+        mode: 0600
+
+    - name: configure vagrant_provisioner boxes
       set_fact:
-        vagrant_sandbox_vms_ramdom:
-            {{ vagrant_presets_vms
-               selectattr("box",
-                          "equalto",
-                          vagrant_provisioner_boxes[0].name)
-               | list }}
+        vagrant_provisioner_boxes:
+          - name: centos-6-i386
+            address: bento/centos-6.7-i386
+            distribution: CentOS
+            distribution_version: 6
+            playbook: /tmp/bootstrap.yml
+
+    - name: configure vagrant_provisioner virtual machines
+      set_fact:
+        vagrant_provisioner_vms:
+          - name: centos-6-i386-1
+            hostname: centos-6-i386-1
+            box: centos-6-i386
+            memory: 128
+            ansible_user: vagrant
+            ansible_ssh_pass: vagrant
+            ansible_become: true
+            ansible_become_user: root
+            ansible_become_method: sudo
+            options:
+              - "config.ssh.forward_agent = true"
+              - "config.ssh.forward_x11 = true"
+          - name: centos-6-i386-2
+            hostname: centos-6-i386-2
+            box: centos-6-i386
+            memory: 128
+            ansible_user: vagrant
+            ansible_ssh_pass: vagrant
+            ansible_become: true
+            ansible_become_user: root
+            ansible_become_method: sudo
+            options:
+              - "config.ssh.forward_agent = true"
+              - "config.ssh.forward_x11 = true"
 
     - name: setup sandbox config for explicit inventory file test 1
       set_fact:
-        boxes_inventory_1: "{{ vagrant_sandbox_boxes_random }}"
+        boxes_inventory_1: "{{ vagrant_provisioner_boxes }}"
         vms_inventory_1: >-
-          {{ vagrant_sandbox_vms_random
+          {{ vagrant_provisioner_vms
              | vagrant_presets_randomize_names }}
 
     - name: setup sandbox config for explicit inventory file test 2
       set_fact:
-        boxes_inventory_2: "{{ vagrant_sandbox_boxes_random }}"
+        boxes_inventory_2: "{{ vagrant_provisioner_boxes }}"
         vms_inventory_2: >-
-          {{ vagrant_sandbox_vms_random
+          {{ vagrant_provisioner_vms
              | vagrant_presets_randomize_names }}
 
     - name: setup sandbox config for automatic inventory file tests 1
       set_fact:
-        boxes_inventory_3: "{{ vagrant_sandbox_boxes_random }}"
+        boxes_inventory_3: "{{ vagrant_provisioner_boxes }}"
         vms_inventory_3: >
-          {{ vagrant_sandbox_vms_random
+          {{ vagrant_provisioner_vms
              | vagrant_presets_randomize_names }}
 
     - name: setup sandbox config for automatic inventory file tests 2
       set_fact:
-        boxes_inventory_4: "{{ vagrant_sandbox_boxes_random }}"
+        boxes_inventory_4: "{{ vagrant_provisioner_boxes }}"
         vms_inventory_4: >
-          {{ vagrant_sandbox_vms_random
+          {{ vagrant_provisioner_vms
              | vagrant_presets_randomize_names }}
 
     - name: setup sandbox config for automatic inventory file tests 3
       set_fact:
-        boxes_inventory_5: "{{ vagrant_sandbox_boxes_random }}"
+        boxes_inventory_5: "{{ vagrant_provisioner_boxes }}"
         vms_inventory_5: >
-          {{ vagrant_sandbox_vms_random
+          {{ vagrant_provisioner_vms
              | vagrant_presets_randomize_names }}
 
     - name: setup sandbox config for automatic inventory file tests 4
       set_fact:
-        boxes_inventory_6: "{{ vagrant_sandbox_boxes_random }}"
+        boxes_inventory_6: "{{ vagrant_provisioner_boxes }}"
         vms_inventory_6: >
-          {{ vagrant_sandbox_vms_random
+          {{ vagrant_provisioner_vms
              | vagrant_presets_randomize_names }}
 
 - name: test disabling idempotence check

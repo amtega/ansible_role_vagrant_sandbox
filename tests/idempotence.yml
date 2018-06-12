@@ -2,7 +2,7 @@
 # Tasks for idempotence tests
 
 - name: create file for testing
-  hosts: vagrant_sandbox_vms_nested
+  hosts: vagrant_sandbox_vms
   tasks:
     - name: create testing file
       copy:
