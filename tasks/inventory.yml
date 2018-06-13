@@ -13,15 +13,16 @@
           set_fact:
             vagrant_sandbox_inventory: >-
               {{ vagrant_sandbox_create_inventory_result.path }}
-
-        - name: show inventory file path
-          debug:
-            msg: "{{ vagrant_sandbox_inventory }}"
       when:
         - vagrant_sandbox_state in ["started", "recreated"]
         - >-
           vagrant_sandbox_inventory is none
           or vagrant_sandbox_inventory | length == 0
+
+    - name: show inventory file path
+      debug:
+        msg: "{{ vagrant_sandbox_inventory }}"
+      when: vagrant_sandbox_create_inventory_result is changed
 
     - name: delete temporary file with vagrant sandbox vms inventory
       file:
