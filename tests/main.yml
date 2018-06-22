@@ -85,6 +85,8 @@
             distribution: CentOS
             distribution_version: 6
             playbook: /tmp/bootstrap.yml
+            options:
+              - "config.vm.boot_timeout = 300"
 
     - name: configure vagrant_provisioner virtual machines
       set_fact:
@@ -99,6 +101,7 @@
             ansible_become_user: root
             ansible_become_method: sudo
             options:
+              - "config.vm.boot_timeout = 300"
               - "config.ssh.forward_agent = true"
               - "config.ssh.forward_x11 = true"
           - name: centos-6-i386-2
@@ -111,6 +114,7 @@
             ansible_become_user: root
             ansible_become_method: sudo
             options:
+              - "config.vm.boot_timeout = 300"
               - "config.ssh.forward_agent = true"
               - "config.ssh.forward_x11 = true"
 
