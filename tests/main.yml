@@ -85,6 +85,7 @@
             distribution: CentOS
             distribution_version: 6
             playbook: /tmp/bootstrap.yml
+            max_provisioning_time: 600
             options:
               - "config.vm.boot_timeout = 600"
 
@@ -95,6 +96,7 @@
             hostname: centos-6-i386-1
             box: centos-6-i386
             memory: 128
+            max_provisioning_time: 600
             ansible_user: vagrant
             ansible_ssh_pass: vagrant
             ansible_become: true
@@ -109,6 +111,7 @@
             hostname: centos-6-i386-2
             box: centos-6-i386
             memory: 128
+            max_provisioning_time: 600
             ansible_user: vagrant
             ansible_ssh_pass: vagrant
             ansible_become: true
