@@ -19,6 +19,8 @@
         file_type: file
       register: vagrant_sandbox_search_state_files_result
 
+    - debug: var=vagrant_sandbox_search_state_files_result
+
     - name: load sandbox state files info
       include_vars:
         file: "{{ item }}"
@@ -28,6 +30,20 @@
         {{ vagrant_sandbox_search_state_files_result.files
            | map(attribute="path")
            | list }}
+
+    - debug: msg="{{ hostvars[inventory_hostname] }}"
+
+    - name: destroy previous stalled vagrant vms
+      debug: msg="{{ vagrant_sandbox_get_ppid_result.stdout }} {{ ansible_user_id }} {{ vagrant_sandbox_playbook }} {{ vagrant_sandbox_inventory }}"
+      vars:
+        ppid: "{{ vagrant_sandbox_get_ppid_result.stdout }}"
+        user: "{{ ansible_user_id }}"
+        playbook: "{{ vagrant_sandbox_playbook }}"
+        inventory: "{{ vagrant_sandbox_inventory }}"
+        vagrant_provisioner_plugins: []
+        vagrant_provisioner_boxes: []
+        vagrant_provisioner_vms: >-
+          {{ lookup('template', 'stalled_vms.j2') | from_yaml }}
 
     - name: destroy previous stalled vagrant vms
       include_role:

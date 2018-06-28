@@ -86,7 +86,7 @@
             distribution_version: 6
             playbook: /tmp/bootstrap.yml
             options:
-              - "config.vm.boot_timeout = 300"
+              - "config.vm.boot_timeout = 600"
 
     - name: configure vagrant_provisioner virtual machines
       set_fact:
@@ -104,6 +104,7 @@
               - "config.vm.boot_timeout = 300"
               - "config.ssh.forward_agent = true"
               - "config.ssh.forward_x11 = true"
+              - "config.vm.boot_timeout = 600"
           - name: centos-6-i386-2
             hostname: centos-6-i386-2
             box: centos-6-i386
@@ -117,6 +118,7 @@
               - "config.vm.boot_timeout = 300"
               - "config.ssh.forward_agent = true"
               - "config.ssh.forward_x11 = true"
+              - "config.vm.boot_timeout = 600"
 
     - name: setup sandbox config for explicit inventory file test 1
       set_fact:
