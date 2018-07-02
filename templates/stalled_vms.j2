@@ -1,8 +1,6 @@
-{% for state_var in hostvars[inventory_hostname]
-                    | select("search", "vagrant_provisioner_state_.*")
-                    | list %}
-{% set state=hostvars[inventory_hostname][state_var] %}
-{% set vm_name=state_var | regex_replace("vagrant_provisioner_state_", "") %}
+{% for result in vagrant_sandbox_read_state_files_result.results %}
+{% set state=result.stdout | from_yaml %}
+{% set vm_name=result.item | dirname | basename %}
 {% if (state.ppid == ppid and vagrant_sandbox_cleanup_by_ppid)
       or (state.user == user and vagrant_sandbox_cleanup_by_user)
       or (state.playbook == playbook and vagrant_sandbox_cleanup_by_playbook)
