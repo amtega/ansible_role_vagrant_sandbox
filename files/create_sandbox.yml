@@ -11,6 +11,8 @@
       private: no
   roles:
     - role: amtega.vagrant_presets
+      vagrant_presets_boxes_json_query: "[? name != '']"
+
     - role: amtega.vagrant_sandbox
       vagrant_sandbox_state: started
       vagrant_sandbox_idempotence_test: false

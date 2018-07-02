@@ -19,11 +19,9 @@
         file_type: file
       register: vagrant_sandbox_search_state_files_result
 
-    - name: load sandbox state files info
-      include_vars:
-        file: "{{ item }}"
-        name: >-
-          vagrant_provisioner_state_{{ item | dirname | basename }}
+    - name: read sandbox state files info
+      shell: "cat {{ item }}"
+      register: vagrant_sandbox_read_state_files_result
       loop: >-
         {{ vagrant_sandbox_search_state_files_result.files
            | map(attribute="path")
@@ -35,7 +33,9 @@
       when: vagrant_provisioner_vms | length > 0
       vars:
         ppid: "{{ vagrant_sandbox_get_ppid_result.stdout }}"
-        user: "{{ ansible_user_id }}"
+        user: >-
+          {{ (ansible_facts.env
+              | default(ansible_facts.ansible_env))["USER"] }}
         playbook: "{{ vagrant_sandbox_playbook }}"
         inventory: "{{ vagrant_sandbox_inventory }}"
         vagrant_provisioner_plugins: []
