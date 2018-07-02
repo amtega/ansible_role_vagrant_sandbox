@@ -20,7 +20,9 @@ vagrant_sandbox_vms: []
 
 # Directory where sandbox vms will be placed
 
-vagrant_sandbox_vms_directory: "~/.vagrant_sandbox"
+vagrant_sandbox_vms_directory: >-
+  {{ (ansible_facts.env
+      | default(ansible_facts.ansible_env))["HOME"] }}/.vagrant_sandbox
 
 # Group to put in the sandbox provisioned vms
 
