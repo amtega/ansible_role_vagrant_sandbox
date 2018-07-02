@@ -16,9 +16,13 @@
 - name: run idempotence test
   hosts: localhost
   roles:
+    # The idempotence tests are disabled in the outer vms because is tested
+    # later within the inner vms.
+
     - role: amtega.vagrant_sandbox
       vagrant_sandbox_state: started
       vagrant_provisioner_vm_memory: 1024
+      vagrant_sandbox_idempotence_test: false
   tags:
     - sandbox
 
@@ -37,7 +41,7 @@
 
     - meta: flush_handlers
   tags:
-    - idempotence
+    - prepare
 
 - name: setup software and config requirements in sandbox hosts
   hosts: vagrant_sandbox_vms
@@ -263,7 +267,9 @@
   tasks:
     - name: assert that idempotence test was ok
       assert:
-        that: not vagrant_sandbox_idempotence_result is failed
+        that: >-
+          vagrant_sandbox_idempotence_result is undefined
+          or not vagrant_sandbox_idempotence_result is failed
 
 - name: test that vms were recreated after running idempotence test
   hosts: docker_sandbox_containers
