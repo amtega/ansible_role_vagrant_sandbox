@@ -16,8 +16,8 @@
 - name: run idempotence test
   hosts: localhost
   roles:
-    # The idempotence tests are disabled in the outer vms because is tested
-    # later within the inner vms.
+    # The idempotence tests are disabled in the outer vms because they are
+    # tested later within the inner vms.
 
     - role: amtega.vagrant_sandbox
       vagrant_sandbox_state: started
