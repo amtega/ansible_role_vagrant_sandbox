@@ -42,6 +42,7 @@
     - meta: flush_handlers
   tags:
     - prepare
+    - idempotence
 
 - name: setup software and config requirements in sandbox hosts
   hosts: vagrant_sandbox_vms
