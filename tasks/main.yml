@@ -2,7 +2,7 @@
 # Role tasks
 
 - name: sanity checks
-  import_tasks: verify.yml
+  import_tasks: check.yml
   tags:
     - role::vagrant_sandbox
     - role::vagrant_sandbox::check
