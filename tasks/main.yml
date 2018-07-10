@@ -1,11 +1,11 @@
 ---
 # Role tasks
 
-- name: verify sandbox parameters
-  import_tasks: verify.yml
+- name: sanity checks
+  import_tasks: check.yml
   tags:
     - role::vagrant_sandbox
-    - role::vagrant_sandbox::verify
+    - role::vagrant_sandbox::check
 
 - name: load sandbox presets
   import_tasks: presets.yml

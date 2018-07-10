@@ -6,7 +6,7 @@ The role will provisione a vagrant based sandbox and run idempotence tests on th
 
 ## Requirements
 
-[Ansible 2.5+](http://docs.ansible.com/ansible/latest/intro_installation.html)
+[Ansible 2.6+](http://docs.ansible.com/ansible/latest/intro_installation.html)
 
 ## Role Variables
 

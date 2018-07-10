@@ -25,7 +25,9 @@
         label: "{{ vm.name }}"
       vars:
         ppid: "{{ vagrant_sandbox_get_ppid_result.stdout }}"
-        user: "{{ ansible_user_id }}"
+        user: >-
+          {{ (ansible_facts.env
+              | default(ansible_facts.ansible_env))["USER"] }}
         playbook: "{{ vagrant_sandbox_playbook }}"
         inventory: "{{ vagrant_sandbox_inventory }}"
   tags:

@@ -16,8 +16,8 @@
 - name: run idempotence test
   hosts: localhost
   roles:
-    # The idempotence tests are disabled in the outer vms because is tested
-    # later within the inner vms.
+    # The idempotence tests are disabled in the outer vms because they are
+    # tested later within the inner vms.
 
     - role: amtega.vagrant_sandbox
       vagrant_sandbox_state: started
@@ -42,6 +42,7 @@
     - meta: flush_handlers
   tags:
     - prepare
+    - idempotence
 
 - name: setup software and config requirements in sandbox hosts
   hosts: vagrant_sandbox_vms
@@ -54,7 +55,7 @@
       package:
         name: "{{ item }}"
         state: present
-      with_items:
+      loop:
         - python-pip
         - sshpass
 
