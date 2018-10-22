@@ -1,6 +1,7 @@
 ---
 
 galaxy_info:
+  role_name: vagrant_sandbox
   author: Juan Antonio Valiño García
   description: >-
     Wraps vagrant_provisioner and idempotence_tester roles to make easy to run
