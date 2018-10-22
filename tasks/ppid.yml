@@ -3,7 +3,7 @@
 
 - name: get parent process id
   shell: "echo $PPID"
-  changed_when: false
+  changed_when: no
   register: vagrant_sandbox_get_ppid_result
   tags:
     - role::vagrant_sandbox

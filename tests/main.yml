@@ -22,14 +22,14 @@
     - role: amtega.vagrant_sandbox
       vagrant_sandbox_state: started
       vagrant_provisioner_vm_memory: 1024
-      vagrant_sandbox_idempotence_test: false
+      vagrant_sandbox_idempotence_test: no
   tags:
     - sandbox
 
 - name: update kernel in sandbox hosts and reboot them
   hosts: vagrant_sandbox_vms
   roles:
-    - amtega.gnu_linux
+    - amtega.reboot
   tasks:
     - name: update kernel
       package:
@@ -104,7 +104,7 @@
             max_provisioning_time: 600
             ansible_user: vagrant
             ansible_ssh_pass: vagrant
-            ansible_become: true
+            ansible_become: yes
             ansible_become_user: root
             ansible_become_method: sudo
             options:
@@ -180,11 +180,11 @@
       vagrant_sandbox_state: started
       vagrant_sandbox_inventory: "./vagrant_sandbox_inventory"
       vagrant_sandbox_group: vagrant_sandbox_vms_disable_idempotence
-      vagrant_sandbox_idempotence_test: false
-      vagrant_sandbox_cleanup_by_ppid: true
-      vagrant_sandbox_cleanup_by_user: true
-      vagrant_sandbox_cleanup_by_playbook: true
-      vagrant_sandbox_cleanup_by_inventory: true
+      vagrant_sandbox_idempotence_test: no
+      vagrant_sandbox_cleanup_by_ppid: yes
+      vagrant_sandbox_cleanup_by_user: yes
+      vagrant_sandbox_cleanup_by_playbook: yes
+      vagrant_sandbox_cleanup_by_inventory: yes
 
 - name: test cleanup by inventory file
   hosts: vagrant_sandbox_vms
@@ -196,18 +196,18 @@
       vagrant_sandbox_state: started
       vagrant_sandbox_inventory: "./vagrant_sandbox_inventory"
       vagrant_sandbox_group: vagrant_sandbox_vms_cleanup_by_inventory
-      vagrant_sandbox_idempotence_test: false
-      vagrant_sandbox_cleanup_by_ppid: false
-      vagrant_sandbox_cleanup_by_user: false
-      vagrant_sandbox_cleanup_by_playbook: false
-      vagrant_sandbox_cleanup_by_inventory: true
+      vagrant_sandbox_idempotence_test: no
+      vagrant_sandbox_cleanup_by_ppid: no
+      vagrant_sandbox_cleanup_by_user: no
+      vagrant_sandbox_cleanup_by_playbook: no
+      vagrant_sandbox_cleanup_by_inventory: yes
   tasks:
     - name: search running vagrant vms created by the test
       shell: >-
         vagrant global-status --prune --machine-readable
         | grep "{{ vagrant_sandbox_vms_directory | expanduser }}"
         | cut -f 5 -d','
-      changed_when: false
+      changed_when: no
       register: search_test_vms_result
 
     - name: verify only running vagrant vms are the last ones created
@@ -236,7 +236,7 @@
         vagrant global-status --prune --machine-readable
         | grep "{{ vagrant_sandbox_vms_directory | expanduser }}"
         | cut -f 5 -d','
-      changed_when: false
+      changed_when: no
       register: search_test_vms_result
 
     - name: verify there are not running test vagrant vms
@@ -263,8 +263,8 @@
       vagrant_sandbox_vms: "{{ vms_inventory_3 }}"
       vagrant_sandbox_state: started
       vagrant_sandbox_group: docker_sandbox_containers
-      vagrant_sandbox_idempotence_test: true
-      vagrant_sandbox_idempotence_test_recreate_after: true
+      vagrant_sandbox_idempotence_test: yes
+      vagrant_sandbox_idempotence_test_recreate_after: yes
   tasks:
     - name: assert that idempotence test was ok
       assert:
@@ -299,8 +299,8 @@
       vagrant_sandbox_vms: "{{ vms_inventory_3 }}"
       vagrant_sandbox_state: recreated
       vagrant_sandbox_group: docker_sandbox_containers
-      vagrant_sandbox_idempotence_test: true
-      vagrant_sandbox_idempotence_test_recreate_after: false
+      vagrant_sandbox_idempotence_test: yes
+      vagrant_sandbox_idempotence_test_recreate_after: no
 
 - name: test that vms were not recreated after idempotence test
   hosts: docker_sandbox_containers
@@ -333,17 +333,17 @@
       vagrant_sandbox_vms: "{{ vms_inventory_4 }}"
       vagrant_sandbox_state: started
       vagrant_sandbox_group: vagrant_sandbox_vms_cleanup_by_ppid
-      vagrant_sandbox_idempotence_test: false
-      vagrant_sandbox_cleanup_by_ppid: true
-      vagrant_sandbox_cleanup_by_user: false
-      vagrant_sandbox_cleanup_by_playbook: false
+      vagrant_sandbox_idempotence_test: no
+      vagrant_sandbox_cleanup_by_ppid: yes
+      vagrant_sandbox_cleanup_by_user: no
+      vagrant_sandbox_cleanup_by_playbook: no
   tasks:
     - name: search running vagrant vms created by the test
       shell: >-
         vagrant global-status --prune --machine-readable
         | grep "{{ vagrant_sandbox_vms_directory | expanduser }}"
         | cut -f 5 -d','
-      changed_when: false
+      changed_when: no
       register: search_test_vms_result
 
     - name: verify only running vagrant vms are the last ones created
@@ -365,17 +365,17 @@
       vagrant_sandbox_vms: "{{ vms_inventory_5 }}"
       vagrant_sandbox_state: started
       vagrant_sandbox_group: vagrant_sandbox_vms_cleanup_by_user
-      vagrant_sandbox_idempotence_test: false
-      vagrant_sandbox_cleanup_by_ppid: false
-      vagrant_sandbox_cleanup_by_user: true
-      vagrant_sandbox_cleanup_by_playbook: false
+      vagrant_sandbox_idempotence_test: no
+      vagrant_sandbox_cleanup_by_ppid: no
+      vagrant_sandbox_cleanup_by_user: yes
+      vagrant_sandbox_cleanup_by_playbook: no
   tasks:
     - name: search running vagrant vms created by the test
       shell: >-
         vagrant global-status --prune --machine-readable
         | grep "{{ vagrant_sandbox_vms_directory | expanduser }}"
         | cut -f 5 -d','
-      changed_when: false
+      changed_when: no
       register: search_test_vms_result
 
     - name: verify only running vagrant vms are the last ones created
@@ -397,17 +397,17 @@
       vagrant_sandbox_vms: "{{ vms_inventory_6 }}"
       vagrant_sandbox_state: started
       vagrant_sandbox_group: vagrant_sandbox_vms
-      vagrant_sandbox_idempotence_test: false
-      vagrant_sandbox_cleanup_by_ppid: false
-      vagrant_sandbox_cleanup_by_user: false
-      vagrant_sandbox_cleanup_by_playbook: true
+      vagrant_sandbox_idempotence_test: no
+      vagrant_sandbox_cleanup_by_ppid: no
+      vagrant_sandbox_cleanup_by_user: no
+      vagrant_sandbox_cleanup_by_playbook: yes
   tasks:
     - name: search running vagrant vms created by the test
       shell: >-
         vagrant global-status --prune --machine-readable
         | grep "{{ vagrant_sandbox_vms_directory | expanduser }}"
         | cut -f 5 -d','
-      changed_when: false
+      changed_when: no
       register: search_test_vms_result
 
     - name: verify only running vagrant vms are the last ones created
@@ -445,7 +445,7 @@
         vagrant global-status --prune --machine-readable
         | grep "{{ vagrant_sandbox_vms_directory | expanduser }}"
         | cut -f 5 -d','
-      changed_when: false
+      changed_when: no
       register: search_test_vms_result
 
     - name: verify there are not running test vagrant vms

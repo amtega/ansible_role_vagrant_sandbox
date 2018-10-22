@@ -42,12 +42,12 @@ vagrant_sandbox_inventory:
 
 # Indicate if the idempotence test must be run using idempotence_tester role.
 
-vagrant_sandbox_idempotence_test: true
+vagrant_sandbox_idempotence_test: yes
 
 # Indicate if the provisioned vms must be recreated after running the
 # idempotence test.
 
-vagrant_sandbox_idempotence_test_recreate_after: true
+vagrant_sandbox_idempotence_test_recreate_after: yes
 
 # Before setup the sandbox remove previous vms created with the same
 # parent process id than actual. Be warned that this option may cause problems
