@@ -15,9 +15,9 @@
 
     - role: amtega.vagrant_sandbox
       vagrant_sandbox_state: started
-      vagrant_sandbox_idempotence_test: false
-      vagrant_sandbox_cleanup_by_ppid: false
-      vagrant_sandbox_cleanup_by_user: false
-      vagrant_sandbox_cleanup_by_playbook: false
+      vagrant_sandbox_idempotence_test: no
+      vagrant_sandbox_cleanup_by_ppid: no
+      vagrant_sandbox_cleanup_by_user: no
+      vagrant_sandbox_cleanup_by_playbook: no
   tasks:
     - debug: var=vagrant_sandbox_inventory
