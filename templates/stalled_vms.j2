@@ -10,4 +10,6 @@
   directory: "{{ vagrant_sandbox_vms_directory | expanduser }}/{{ vm_name }}"
   state: "absent"
 {% endif %}
+{% else %}
+[]
 {% endfor %}
