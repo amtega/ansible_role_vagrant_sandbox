@@ -22,6 +22,7 @@
     - name: read sandbox state files info
       shell: "cat {{ item }}"
       register: vagrant_sandbox_read_state_files_result
+      changed_when: no
       loop: >-
         {{ vagrant_sandbox_search_state_files_result.files
            | map(attribute="path")
