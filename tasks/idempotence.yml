@@ -2,20 +2,20 @@
 # Idempotence test tasks
 
 - block:
-    - name: run idempotence test
+    - name: Run idempotence test
       include_role:
         name: amtega.idempotence_tester
       vars:
         idempotence_tester_inventory: "{{ vagrant_sandbox_inventory }}"
         idempotence_tester_group: "{{ vagrant_sandbox_group }}"
 
-    - name: setup fact to store idempotence test result
+    - name: Setup fact to store idempotence test result
       set_fact:
         vagrant_sandbox_idempotence_result: >-
           {{ idempotence_tester_test_result }}
 
     - block:
-        - name: destroy sandbox vms after running idempotence test
+        - name: Destroy sandbox vms after running idempotence test
           include_role:
             name: amtega.vagrant_provisioner
           vars:
@@ -27,7 +27,7 @@
             vagrant_provisioner_inventory: "{{ vagrant_sandbox_inventory }}"
             vagrant_provisioner_vm_state: absent
 
-        - name: recreate sandbox vms after running idempotence test
+        - name: Recreate sandbox vms after running idempotence test
           import_tasks: provision.yml
       when: vagrant_sandbox_idempotence_test_recreate_after
   when:

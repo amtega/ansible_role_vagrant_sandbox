@@ -4,27 +4,16 @@ This is an [Ansible](http://www.ansible.com) role that wraps vagrant_provisioner
 
 The role will provisione a vagrant based sandbox and run idempotence tests on the deployed virtual machines.
 
-## Requirements
-
-[Ansible 2.7+](http://docs.ansible.com/ansible/latest/intro_installation.html)
-
 ## Role Variables
 
 A list of all the default variables for this role is available in `defaults/main.yml`.
 
 Also, the role setup the following facts during execution:
 
-- vagrant_sandbox_boxes: contains the list of vagrant boxes provisioned on the sandbox.
-- vagrant_sandbox_vms: contains the list of randomized vagrant vms provisioned on the sandbox.
-- vagrant_sandbox_inventory: contains the path to a inventory file with the vagrant vms deployed in the sandbox.
-- vagrant_sandbox_idempotence_result: contains the result of the idempotence tests.
-
-## Dependencies
-
-- amtega.vagrant_provisioner
-- amtega.idempotence_tester
-
-You can tune the behaviour of this dependant roles with their respective settings.
+- `vagrant_sandbox_boxes`: contains the list of vagrant boxes provisioned on the sandbox.
+- `vagrant_sandbox_vms`: contains the list of randomized vagrant vms provisioned on the sandbox.
+- `vagrant_sandbox_inventory`: contains the path to a inventory file with the vagrant vms deployed in the sandbox.
+- `vagrant_sandbox_idempotence_result`: contains the result of the idempotence tests.
 
 ## Example Playbook
 
@@ -37,7 +26,8 @@ This is an example playbook:
   roles:
     - role: amtega.vagrant_presets
     - role: amtega.vagrant_sandbox
-      vagrant_sandbox_state: started
+      vars:
+        vagrant_sandbox_state: started
   tasks:
     - name: assert that idempotence test was ok
       assert:
@@ -101,7 +91,7 @@ $ ansible-playbook main.yml
 
 ## License
 
-Copyright (C) 2018 AMTEGA - Xunta de Galicia
+Copyright (C) 2019 AMTEGA - Xunta de Galicia
 
 This role is free software: you can redistribute it and/or modify it under the terms of:
 

@@ -2,11 +2,11 @@
 # Vagrant provision tasks
 
 - block:
-    - name: create virtual machines state information
+    - name: Create virtual machines state information
       include_tasks: state.yml
       when: vagrant_sandbox_state in ["started", "recreated"]
 
-    - name: provisione vagrant sandbox environment
+    - name: Provisione vagrant sandbox environment
       include_role:
         name: amtega.vagrant_provisioner
       vars:

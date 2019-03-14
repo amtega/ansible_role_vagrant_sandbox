@@ -3,13 +3,13 @@
 
 - block:
     - block:
-        - name: create temporary file to store vagrant sandbox vms inventory
+        - name: Create temporary file to store vagrant sandbox vms inventory
           tempfile:
             state: file
             suffix: .inventory.yml
           register: vagrant_sandbox_create_inventory_result
 
-        - name: setup fact with path to inventory
+        - name: Setup fact with path to inventory
           set_fact:
             vagrant_sandbox_inventory: >-
               {{ vagrant_sandbox_create_inventory_result.path }}
@@ -19,12 +19,12 @@
           vagrant_sandbox_inventory is none
           or vagrant_sandbox_inventory | length == 0
 
-    - name: show inventory file path
+    - name: Show inventory file path
       debug:
         msg: "{{ vagrant_sandbox_inventory }}"
       when: vagrant_sandbox_create_inventory_result is changed
 
-    - name: delete temporary file with vagrant sandbox vms inventory
+    - name: Delete temporary file with vagrant sandbox vms inventory
       file:
         path: "{{ vagrant_sandbox_inventory }}"
         state: absent

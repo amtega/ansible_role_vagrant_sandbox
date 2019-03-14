@@ -1,7 +1,7 @@
 ---
 # Role tasks
 
-- name: defaulting vagrant sandbox from vagrant_presets role
+- name: Defaulting vagrant sandbox from vagrant_presets role
   set_fact:
     vagrant_sandbox_boxes: >-
       {{ vagrant_presets_boxes }}

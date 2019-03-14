@@ -2,7 +2,7 @@
 # Sandbox parameters verification tasks
 
 - block:
-    - name: assert platform is supported
+    - name: Assert platform is supported
       assert:
         that:
           - distribution in vagrant_sandbox_supported_distributions
@@ -13,7 +13,7 @@
       vars:
         distribution: "{{ ansible_facts.distribution | lower }}"
 
-    - name: check vagrant sandbox state value
+    - name: Check vagrant sandbox state value
       fail:
         msg: "vagrant_sandbox_state has an invalid value"
       when: vagrant_sandbox_state not in ["started", "recreated", "absent"]

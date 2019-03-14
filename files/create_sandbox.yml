@@ -1,10 +1,10 @@
 ---
 # Create a sandbox environment
 
-- name: create vagrant sandbox environment
+- name: Create vagrant sandbox environment
   hosts: localhost
   vars_prompt:
-    - name: "vagrant_sandbox_inventory"
+    - name: vagrant_sandbox_inventory
       prompt: >-
         Enter absolute path to vagrant sandbox inventory file
         (if not given a random one will be created)
