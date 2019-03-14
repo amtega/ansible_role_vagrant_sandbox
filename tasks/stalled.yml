@@ -20,7 +20,7 @@
       register: vagrant_sandbox_search_state_files_result
 
     - name: Read sandbox state files info
-      shell: "cat {{ item }}"
+      command: "cat {{ item }}"
       register: vagrant_sandbox_read_state_files_result
       changed_when: no
       loop: >-
