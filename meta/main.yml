@@ -38,10 +38,14 @@ dependencies:
     tags:
       - role::vagrant_sandbox
 
+  - role: amtega.vagrant_engine
+    tags:
+      - never
+
   - role: amtega.vagrant_provisioner
     tags:
       - never
 
   - role: amtega.idempotence_tester
     tags:
-      - never      
+      - never
