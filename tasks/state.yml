@@ -2,7 +2,7 @@
 # Vagrant provision tasks
 
 - block:
-    - name: create directory for vagrant sandbox state file
+    - name: Create directory for vagrant sandbox state file
       file:
         path: "{{ vagrant_sandbox_vms_directory }}/{{ vm.name }}"
         state: directory
@@ -11,7 +11,7 @@
         loop_var: "vm"
         label: "{{ vm.name }}"
 
-    - name: create vagrant sandbox state file
+    - name: Create vagrant sandbox state file
       template:
         src: sandbox.yml.j2
         dest: >-

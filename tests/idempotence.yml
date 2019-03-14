@@ -1,10 +1,10 @@
 ---
 # Tasks for idempotence tests
 
-- name: create file for testing
+- name: Create file for testing
   hosts: vagrant_sandbox_vms
   tasks:
-    - name: create testing file
+    - name: Create testing file
       copy:
         content: "Hello World"
         dest: /tmp/testfile

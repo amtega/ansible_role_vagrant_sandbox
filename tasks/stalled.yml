@@ -2,16 +2,16 @@
 # Stalled vms managament tasks
 
 - block:
-    - name: get playbook file
+    - name: Get playbook file
       vagrant_sandbox_playbook:
       register: vagrant_sandbox_get_playbook_result
 
-    - name: setup fact with full playbook path
+    - name: Setup fact with full playbook path
       set_fact:
         vagrant_sandbox_playbook: >-
           {{ playbook_dir }}/{{ vagrant_sandbox_get_playbook_result.playbook }}
 
-    - name: search sandbox state files
+    - name: Search sandbox state files
       find:
         paths: "{{ vagrant_sandbox_vms_directory | expanduser }}"
         recurse: yes
@@ -19,7 +19,7 @@
         file_type: file
       register: vagrant_sandbox_search_state_files_result
 
-    - name: read sandbox state files info
+    - name: Read sandbox state files info
       shell: "cat {{ item }}"
       register: vagrant_sandbox_read_state_files_result
       changed_when: no
@@ -28,7 +28,7 @@
            | map(attribute="path")
            | list }}
 
-    - name: destroy previous stalled vagrant vms
+    - name: Destroy previous stalled vagrant vms
       include_role:
         name: amtega.vagrant_provisioner
       when: vagrant_provisioner_vms | length > 0

@@ -1,42 +1,42 @@
 ---
 # Role tasks
 
-- name: sanity checks
+- name: Sanity checks
   import_tasks: check.yml
   tags:
     - role::vagrant_sandbox
     - role::vagrant_sandbox::check
 
-- name: load sandbox presets
+- name: Load sandbox presets
   import_tasks: presets.yml
   tags:
     - role::vagrant_sandbox
     - role::vagrant_sandbox::presets
 
-- name: get parent process id
+- name: Get parent process id
   import_tasks: ppid.yml
   tags:
     - role::vagrant_sandbox
 
-- name: manage stalled containers
+- name: Manage stalled containers
   import_tasks: stalled.yml
   tags:
     - role::vagrant_sandbox
     - role::vagrant_sandbox::stalled
 
-- name: setup sandbox inventory
+- name: Setup sandbox inventory
   import_tasks: inventory.yml
   tags:
     - role::vagrant_sandbox
     - role::vagrant_sandbox::inventory
 
-- name: setup sandbox environment
+- name: Setup sandbox environment
   import_tasks: provision.yml
   tags:
     - role::vagrant_sandbox
     - role::vagrant_sandbox::provision
 
-- name: run idempotence test
+- name: Run idempotence test
   import_tasks: idempotence.yml
   when: vagrant_sandbox_idempotence_test
   tags:
