@@ -38,7 +38,7 @@
 
 - name: Run idempotence test
   import_tasks: idempotence.yml
-  when: vagrant_sandbox_idempotence_test
+  when: vagrant_sandbox_idempotence_test | bool
   tags:
     - role::vagrant_sandbox
     - role::vagrant_sandbox::idempotence
