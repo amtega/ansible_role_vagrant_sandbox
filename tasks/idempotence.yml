@@ -29,10 +29,10 @@
 
         - name: Recreate sandbox vms after running idempotence test
           import_tasks: provision.yml
-      when: vagrant_sandbox_idempotence_test_recreate_after
+      when: vagrant_sandbox_idempotence_test_recreate_after | bool
   when:
     - vagrant_sandbox_state in ["started", "recreated"]
-    - vagrant_sandbox_idempotence_test
+    - vagrant_sandbox_idempotence_test | bool
     - vagrant_sandbox_inventory | length > 0
 
   tags:

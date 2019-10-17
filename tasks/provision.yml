@@ -29,6 +29,9 @@
         vagrant_provisioner_vm_ansible_ssh_common_args: >-
           -o UserKnownHostsFile=/dev/null
           -o StrictHostKeyChecking=no
+          -o PubkeyAuthentication=no
+          -o PreferredAuthentications=password
+
   tags:
     - role::vagrant_sandbox
     - role::vagrant_sandbox::provision
