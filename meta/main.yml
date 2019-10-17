@@ -9,7 +9,7 @@ galaxy_info:
     unit tests
   company: AMTEGA - Xunta de Galicia
   license: GPLv3 or EUPL
-  min_ansible_version: 2.7
+  min_ansible_version: 2.8
   platforms:
     - name: Debian
       versions:
@@ -19,7 +19,6 @@ galaxy_info:
         - 7
     - name: Fedora
       versions:
-        - 28
         - 29
         - 30
   galaxy_tags:
@@ -30,14 +29,8 @@ galaxy_info:
 
 dependencies:
   - role: amtega.check_platform
-    vars:
-      check_platform_distributions:
-        centos: 7
-        debian: 9
-        fedora: 27
-        rhel: 7
     tags:
-      - role::vagrant_sandbox
+      - never
 
   - role: amtega.vagrant_engine
     tags:
