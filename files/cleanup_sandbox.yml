@@ -1,7 +1,7 @@
 ---
 # Drop a sandbox environment
 
-- name: Cleanup vagrant sandbox environment
+- name: Cleanup testing sandbox environment
   hosts: localhost
   vars_prompt:
     - name: vagrant_sandbox_inventory
