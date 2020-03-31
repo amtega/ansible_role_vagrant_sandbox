@@ -1,15 +1,6 @@
 ---
 # Role tasks
 
-- include_role:
-    name: amtega.check_platform
-  vars:
-    check_platform_distributions:
-      centos: 7
-      debian: 9
-      fedora: 27
-      rhel: 7
-
 - name: Sanity checks
   import_tasks: check.yml
   tags:
@@ -45,7 +36,7 @@
     - role::vagrant_sandbox
     - role::vagrant_sandbox::provision
 
-- name: Run idempotence test
+- name: Setup testing sandbox
   import_tasks: idempotence.yml
   when: vagrant_sandbox_idempotence_test | bool
   tags:
