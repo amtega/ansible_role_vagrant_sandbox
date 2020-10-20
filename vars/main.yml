@@ -15,4 +15,4 @@ vagrant_sandbox_supported_versions:
   centos: 7
   debian: 9
   fedora: 27
-  rhel: 7
+  redhat: 7
